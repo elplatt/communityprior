@@ -1,5 +1,5 @@
-## Estimate SSN-LDA[1] Dirichlet parameters from node communities.
-The estimation uses the MLE method described by `[1]` and implemented by (https://github.com/ericsuh/dirichlet).
+## Estimate SSN-LDA (1) Dirichlet parameters from node communities.
+The estimation uses the MLE method described by (2) and implemented by (https://github.com/ericsuh/dirichlet).
 
 The input csv should be comma separated with no spaces and a header row.
 All ids should be numeric and start at 0.
