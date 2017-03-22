@@ -50,12 +50,12 @@ def estimate_simple(com_data):
     
     # Count size of each community
     com_nodecount = [0.0] * num_coms
-    for i, row in com_data.itterrows():
+    for i, row in com_data.iterrows():
         com_nodecount[int(row['community_id'])] += row['member_prob']
     
     # Count number of communities containing each node
     node_comcount = [0.0] * num_nodes
-    for i, row in com_data.itterrows():
+    for i, row in com_data.iterrows():
         node_comcount[int(row['node_id'])] += row['member_prob']
     
     # Estimate by simple averaging
@@ -63,7 +63,7 @@ def estimate_simple(com_data):
     # e.g. if there are three nodes in a community, each will contribute 1/3 when added.
     alpha = np.zeros((num_coms,))
     beta = np.zeros((num_nodes,))
-    for i, row in com_data.itterrows():
+    for i, row in com_data.iterrows():
         node_id = row['node_id']
         com_id = row['community_id']
         mem_p = row['member_prob']
