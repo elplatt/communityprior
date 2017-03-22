@@ -10,10 +10,6 @@ def data_to_matrix(com_data):
     num_nodes = com_data['node_id'].max() + 1
     num_coms = com_data['community_id'].max() + 1
     
-    print "%d nodes, %d communities" % (num_nodes, num_coms)
-    for i in range(num_coms):
-        print "%d: %d" % (i, len(com_data[com_data['community_id'] == i]))
-    
     # Convert to matrix
     node_com = numpy.zeros((num_nodes,num_coms))
     for i, row in com_data.iterrows():
@@ -29,6 +25,10 @@ def load_as_matrix(filename):
     com_data = pandas.DataFrame.from_csv(filename, index_col=None)
     return data_to_matrix(com_data)
 
+def estimate_simple(p):
+    # Estimate by averaging rows
+    return p.mean(axis=0)
+
 if __name__ == '__main__':
     # Load
     node_com = load_as_matrix(sys.argv[1])
@@ -38,10 +38,12 @@ if __name__ == '__main__':
     p_node = normalize_rows(node_com.transpose())
     
     # Estimate dirichlet parameter for distribution over communities (topics)
-    alpha = dirichlet.mle(p_com)
+    #alpha = dirichlet.mle(p_com)
+    alpha = 50.0 * estimate_simple(p_com)
     
     # Estimate dirichlet parameter for distribution over nodes (terms)
-    beta = dirichlet.mle(p_node)
+    #beta = dirichlet.mle(p_node)
+    beta = 200.0 * estimate_simple(p_node)
 
     # Write output
     with open(sys.argv[2], "wb") as f:
