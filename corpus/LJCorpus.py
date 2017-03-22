@@ -33,6 +33,6 @@ def edges_to_corpus():
             
 class LJCorpus(object):
     def __iter__(self):
-        for line in open(source, "rb"):
-            if line[0] == "#":
-                continue
+        for line in open(corpus_file, "rb"):
+            nodes = [int(v) for v in line.rstrip().split("\t")]
+            yield [(v, 1) for v in nodes]
