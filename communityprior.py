@@ -1,8 +1,8 @@
 import sys
 
 import dirichlet
-import numpy
-import pandas
+import numpy as np
+import pandas as pd
 
 def data_to_matrix(com_data):
     # Count number of nodes and communities
@@ -11,40 +11,78 @@ def data_to_matrix(com_data):
     num_coms = com_data['community_id'].max() + 1
     
     # Convert to matrix
-    node_com = numpy.zeros((num_nodes,num_coms))
+    node_com = np.zeros((num_nodes,num_coms))
     for i, row in com_data.iterrows():
         node_com[int(row["node_id"]),int(row["community_id"])] = row["member_prob"]
     
     return node_com
 
 def normalize_rows(m):
-    return m / m.sum(axis=1)[:,numpy.newaxis]
+    return m / m.sum(axis=1)[:,np.newaxis]
 
 def load_as_matrix(filename):
     # node_id, community_id, member_prob
-    com_data = pandas.DataFrame.from_csv(filename, index_col=None)
+    com_data = pd.DataFrame.from_csv(filename, index_col=None)
     return data_to_matrix(com_data)
 
-def estimate_simple(p):
-    # Estimate by averaging rows
-    return p.mean(axis=0)
-
-if __name__ == '__main__':
-    # Load
-    node_com = load_as_matrix(sys.argv[1])
+def estimate_mle(com_data):
+    # Convert data into matrix
+    node_com = data_to_matrix(com_data)
     
     # Convert rows/cols into probability distributions
     p_com = normalize_rows(node_com)
     p_node = normalize_rows(node_com.transpose())
     
     # Estimate dirichlet parameter for distribution over communities (topics)
-    #alpha = dirichlet.mle(p_com)
-    alpha = 50.0 * estimate_simple(p_com)
+    alpha = dirichlet.mle(p_com)
     
     # Estimate dirichlet parameter for distribution over nodes (terms)
-    #beta = dirichlet.mle(p_node)
-    beta = 200.0 * estimate_simple(p_node)
+    beta = dirichlet.mle(p_node)
+    
+    return (alpha, beta)
 
+def estimate_simple(com_data):
+    
+    # Count number of nodes and communities
+    # Assume the first of each is "0"
+    num_nodes = com_data['node_id'].max() + 1
+    num_coms = com_data['community_id'].max() + 1
+    
+    # Count size of each community
+    com_nodecount = [0.0] * num_coms
+    for i, row in com_data.itterrows():
+        com_nodecount[int(row['community_id'])] += row['member_prob']
+    
+    # Count number of communities containing each node
+    node_comcount = [0.0] * num_nodes
+    for i, row in com_data.itterrows():
+        node_comcount[int(row['node_id'])] += row['member_prob']
+    
+    # Estimate by simple averaging
+    # The above totals are used to normalize samples as we add them,
+    # e.g. if there are three nodes in a community, each will contribute 1/3 when added.
+    alpha = np.zeros((num_coms,))
+    beta = np.zeros((num_nodes,))
+    for i, row in com_data.itterrows():
+        node_id = row['node_id']
+        com_id = row['community_id']
+        mem_p = row['member_prob']
+        alpha[com_id] += mem_p / com_nodecount[com_id]
+        beta[node_id] += mem_p / node_comcount[node_id]
+    
+    # Scale using conventional values
+    alpha = 50.0 * alpha
+    beta = 200.0 * beta
+    
+    return (alpha, beta)
+
+if __name__ == '__main__':
+    # Load data
+    com_data = load_as_matrix(sys.argv)[1]
+    
+    # Estimate
+    alpha, beta = estimate_simple(com_data)
+    
     # Write output
     with open(sys.argv[2], "wb") as f:
         f.write("alpha_k\n")
