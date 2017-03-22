@@ -78,7 +78,7 @@ def estimate_simple(com_data):
 
 if __name__ == '__main__':
     # Load data
-    com_data = load_as_matrix(sys.argv)[1]
+    com_data = load_as_matrix(sys.argv[1])
     
     # Estimate
     alpha, beta = estimate_simple(com_data)
