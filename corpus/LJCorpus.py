@@ -29,7 +29,7 @@ def edges_to_corpus():
     with open(corpus_file, "wb") as f_corpus:
         for key in sorted(edges.keys()):
             document = "\t".join([str(v) for v in edges[key]]) + "\n"
-            corpus_file.write(document)
+            f_corpus.write(document)
             
 class LJCorpus(object):
     def __iter__(self):
