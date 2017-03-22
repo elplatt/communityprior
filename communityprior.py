@@ -9,7 +9,10 @@ def data_to_matrix(com_data):
     # Assume the first of each is "0"
     num_nodes = com_data['node_id'].max() + 1
     num_coms = com_data['community_id'].max() + 1
+    
     print "%d nodes, %d communities" % (num_nodes, num_coms)
+    for i in range(num_coms):
+        print "%d: %d" % (i, len(com_data[com_data['community_id'] == i]))
     
     # Convert to matrix
     node_com = numpy.zeros((num_nodes,num_coms))
