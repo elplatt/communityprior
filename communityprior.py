@@ -48,24 +48,25 @@ def estimate_simple(com_data):
     num_nodes = com_data['node_id'].max() + 1
     num_coms = com_data['community_id'].max() + 1
     
-    # Count size of each community
+    # Count size of each community, node
+    print "Summing weights over all communities, nodes"
     com_nodecount = [0.0] * num_coms
-    for i, row in com_data.iterrows():
-        com_nodecount[int(row['community_id'])] += row['member_prob']
-    
-    # Count number of communities containing each node
     node_comcount = [0.0] * num_nodes
     for i, row in com_data.iterrows():
         node_comcount[int(row['node_id'])] += row['member_prob']
+        com_nodecount[int(row['community_id'])] += row['member_prob']
     
     # Estimate by simple averaging
     # The above totals are used to normalize samples as we add them,
     # e.g. if there are three nodes in a community, each will contribute 1/3 when added.
+    print "Averaging distributions"
     alpha = np.zeros((num_coms,))
     beta = np.zeros((num_nodes,))
     for i, row in com_data.iterrows():
-        node_id = row['node_id']
-        com_id = row['community_id']
+        if i % 1000 == 0:
+            print "  %d/%d" % (i, len(com_data))
+        node_id = int(row['node_id'])
+        com_id = int(row['community_id'])
         mem_p = row['member_prob']
         alpha[com_id] += mem_p / com_nodecount[com_id]
         beta[node_id] += mem_p / node_comcount[node_id]
