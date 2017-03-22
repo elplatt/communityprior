@@ -9,7 +9,7 @@ try:
 except IndexError:
     prob_head = None
 
-print "node_id,community_id,member_prob\n"
+print "node_id,community_id,member_prob"
 df = pandas.DataFrame.from_csv(in_file, index_col=None)
 for i, row in df.iterrows():
     node_id = int(row[node_head])
@@ -18,5 +18,5 @@ for i, row in df.iterrows():
         member_prob = row[prob_head]
     else:
         member_prob = 1.0
-    print "%d,%d,%f\n" % (node_id, community_id, member_prob)
+    print "%d,%d,%f" % (node_id, community_id, member_prob)
     
