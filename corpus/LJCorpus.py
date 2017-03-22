@@ -28,7 +28,7 @@ def edges_to_corpus():
     print "Writing corpus"
     with open(corpus_file, "wb") as f_corpus:
         for key in sorted(edges.keys()):
-            document = "\t".join(edges[key]) + "\n"
+            document = "\t".join([str(v) for v in edges[key]]) + "\n"
             corpus_file.write(document)
             
 class LJCorpus(object):
