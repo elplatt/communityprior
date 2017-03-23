@@ -11,8 +11,9 @@ def edges_to_corpus():
             if row[0] == "#":
                 continue
             source, target = row.rstrip().split('\t')
-            source = int(source)
-            target = int(target)
+            # Convert to int and adjust for 1-based data
+            source = int(source) - 1
+            target = int(target) - 1
             try:
                 source_edges = edges[source]
             except KeyError:
@@ -26,8 +27,15 @@ def edges_to_corpus():
                 edges[target] = target_edges
             target_edges.append(source)
     print "Writing corpus"
+    edge_keys = sorted(edges.keys())
+    if edge_keys[-1] + 1 != len(edge_keys):
+        for i in range(edge_keys[-1] + 1):
+            if i not in edge_keys:
+                print "Node %d missing" % i
+                break
+        raise AssertionError
     with open(corpus_file, "wb") as f_corpus:
-        for key in sorted(edges.keys()):
+        for key in edge_keys:
             document = "\t".join([str(v) for v in edges[key]]) + "\n"
             f_corpus.write(document)
             
