@@ -31,7 +31,7 @@ def edges_to_corpus():
     edge_keys = sorted(edges.keys())
     id_to_index = {}
     with open(dict_file, "wb") as f_dict:
-        for i, key in edge_keys:
+        for i, key in enumerate(edge_keys):
             id_to_index[key] = i
             f_dict.write("node_index,node_id")
             f_dict.write("%d,%d\n" % (i, key))
