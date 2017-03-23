@@ -45,8 +45,14 @@ def estimate_simple(com_data):
     
     # Count number of nodes and communities
     # Assume the first of each is "0"
+    if com_data["node_id"].min() != 0:
+        raise AssertionError
+    if com_data["node_id"].max() != 0:
+        raise AssertionError
     num_nodes = com_data['node_id'].max() + 1
     num_coms = com_data['community_id'].max() + 1
+    
+    print "Estimating %d nodes and %d communities" % (num_nodes, num_coms)
     
     # Count size of each community, node
     print "Summing weights over all communities, nodes"
@@ -72,8 +78,8 @@ def estimate_simple(com_data):
         beta[node_id] += mem_p / node_comcount[node_id]
     
     # Scale using conventional values
-    alpha = 50.0 * alpha
-    beta = 200.0 * beta
+    #alpha = 50.0 * alpha
+    #beta = 200.0 * beta
     
     return (alpha, beta)
 
