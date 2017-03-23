@@ -59,7 +59,7 @@ def estimate_simple(com_data):
         node_id = int(row['node_id']) - min_node
         com_id = int(row['community_id']) - min_node
         node_comcount[node_id] += row['member_prob']
-        com_nodecount[node_id] += row['member_prob']
+        com_nodecount[com_id] += row['member_prob']
     
     # Estimate by simple averaging
     # The above totals are used to normalize samples as we add them,
