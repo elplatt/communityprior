@@ -44,15 +44,10 @@ def estimate_mle(com_data):
 def estimate_simple(com_data):
     
     # Count number of nodes and communities
-    # Assume the first of each is "0"
-    if com_data["node_id"].min() != 0:
-        print "community min: %d" % com_data["node_id"].min()
-        raise AssertionError
-    if com_data["community_id"].max() != 0:
-        print "node min: %d" % com_data["community_id"].min()
-        raise AssertionError
-    num_nodes = com_data['node_id'].max() + 1
-    num_coms = com_data['community_id'].max() + 1
+    min_node = int(com_data["node_id"].min())
+    min_com = int(com_data["community_id"].min())
+    num_nodes = com_data['node_id'].max() - min_node + 1
+    num_coms = com_data['community_id'].max() - min_com + 1
     
     print "Estimating %d nodes and %d communities" % (num_nodes, num_coms)
     
@@ -61,8 +56,10 @@ def estimate_simple(com_data):
     com_nodecount = [0.0] * num_coms
     node_comcount = [0.0] * num_nodes
     for i, row in com_data.iterrows():
-        node_comcount[int(row['node_id'])] += row['member_prob']
-        com_nodecount[int(row['community_id'])] += row['member_prob']
+        node_id = int(row['node_id']) - min_node
+        com_id = int(row['community_id']) - min_node
+        node_comcount[node_id] += row['member_prob']
+        com_nodecount[node_id] += row['member_prob']
     
     # Estimate by simple averaging
     # The above totals are used to normalize samples as we add them,
@@ -73,8 +70,8 @@ def estimate_simple(com_data):
     for i, row in com_data.iterrows():
         if i % 1000 == 0:
             print "  %d/%d" % (i, len(com_data))
-        node_id = int(row['node_id'])
-        com_id = int(row['community_id'])
+        node_id = int(row['node_id']) - min_node
+        com_id = int(row['community_id']) - min_node
         mem_p = row['member_prob']
         alpha[com_id] += mem_p / com_nodecount[com_id]
         beta[node_id] += mem_p / node_comcount[node_id]
