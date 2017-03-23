@@ -12,9 +12,8 @@ def edges_to_corpus():
             if row[0] == "#":
                 continue
             source, target = row.rstrip().split('\t')
-            # Convert to int and adjust for 1-based data
-            source = int(source) - 1
-            target = int(target) - 1
+            source = int(source)
+            target = int(target)
             try:
                 source_edges = edges[source]
             except KeyError:
@@ -27,13 +26,17 @@ def edges_to_corpus():
                 target_edges = []
                 edges[target] = target_edges
             target_edges.append(source)
-    print "Writing dict"
+    print "Creating mapping"
     edge_keys = sorted(edges.keys())
+    min_id = min(edge_keys)
+    max_id = max(edge_keys)
+    print "  %d node_ids, %d - %d" % (len(edge_keys), min_id, max_id)
+    print "Writing dict"
     id_to_index = {}
     with open(dict_file, "wb") as f_dict:
+        f_dict.write("node_index,node_id\n")
         for i, key in enumerate(edge_keys):
             id_to_index[key] = i
-            f_dict.write("node_index,node_id")
             f_dict.write("%d,%d\n" % (i, key))
     print "Writing corpus"
     with open(corpus_file, "wb") as f_corpus:
