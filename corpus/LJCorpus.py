@@ -37,7 +37,7 @@ def edges_to_corpus():
             f_dict.write("%d,%d\n" % (i, key))
     print "Writing corpus"
     with open(corpus_file, "wb") as f_corpus:
-        for i, key in edge_keys:
+        for i, key in enumerate(edge_keys):
             node_indexes = [str(id_to_index[v]) for v in edges[key]]
             document = "\t".join(node_indexes) + "\n"
             f_corpus.write(document)
