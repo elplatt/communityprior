@@ -1,5 +1,6 @@
 edge_file = "data/networks/com-lj.ungraph.txt"
 corpus_file = "data/networks/lj-corpus.csv"
+dict_file = "data/networks/lj_dict.csv"
 
 def edges_to_corpus():
     edges = {}
@@ -26,17 +27,19 @@ def edges_to_corpus():
                 target_edges = []
                 edges[target] = target_edges
             target_edges.append(source)
-    print "Writing corpus"
+    print "Writing dict"
     edge_keys = sorted(edges.keys())
-    if edge_keys[-1] + 1 != len(edge_keys):
-        for i in range(edge_keys[-1] + 1):
-            if i not in edge_keys:
-                print "Node %d missing" % i
-                break
-        raise AssertionError
+    id_to_index = {}
+    with open(dict_file, "wb") as f_dict:
+        for i, key in edge_keys:
+            id_to_index[key] = i
+            f_dict.write("node_index,node_id")
+            f_dict.write("%d,%d\n" % (i, key))
+    print "Writing corpus"
     with open(corpus_file, "wb") as f_corpus:
-        for key in edge_keys:
-            document = "\t".join([str(v) for v in edges[key]]) + "\n"
+        for i, key in edge_keys:
+            node_indexes = [str(id_to_index[v]) for v in edges[key]]
+            document = "\t".join(node_indexes) + "\n"
             f_corpus.write(document)
             
 class LJCorpus(object):
