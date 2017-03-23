@@ -46,8 +46,10 @@ def estimate_simple(com_data):
     # Count number of nodes and communities
     # Assume the first of each is "0"
     if com_data["node_id"].min() != 0:
+        print "community min: %d" % com_data["node_id"].min()
         raise AssertionError
-    if com_data["node_id"].max() != 0:
+    if com_data["community_id"].max() != 0:
+        print "node min: %d" % com_data["community_id"].min()
         raise AssertionError
     num_nodes = com_data['node_id'].max() + 1
     num_coms = com_data['community_id'].max() + 1
