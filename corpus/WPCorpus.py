@@ -43,12 +43,12 @@ def edges_to_corpus():
         f_dict.write("node_index,node_id\n")
         for i, node_id in enumerate(id_order):
             id_to_index[node_id] = i
-            f_dict.write("%d,%d\n" % (i, key))
+            f_dict.write("%d,%d\n" % (i, node_id))
     print "Writing corpus"
     with open(corpus_file, "wb") as f_corpus:
-        for i, key in enumerate(id_order):
-            node_indexes = [str(id_to_index[v]) for v in edges[key]]
-            node_indexes = [str(id_to_index[key])] + node_indexes
+        for i, node_id in enumerate(id_order):
+            node_indexes = [str(id_to_index[v]) for v in edges[node_id]]
+            node_indexes = [str(id_to_index[node_id])] + node_indexes
             document = "\t".join(node_indexes) + "\n"
             f_corpus.write(document)
             
