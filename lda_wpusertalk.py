@@ -7,7 +7,7 @@ import corpus.WPCorpus
 dict_file = "data/networks/wpuser-dict.csv"
 out_file = "output/communities/wpusertalk-simplelda-%d"
 # Ground truth: 12093
-num_topics = sys.argv[1]
+num_topics = int(sys.argv[1])
 num_words = 6470
 
 logging.basicConfig(filename='logs/gensim-wpusertalk-simple-%d.log' % num_topics, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
