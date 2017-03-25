@@ -20,7 +20,7 @@ with open(dict_file, "rb") as f_dict:
     f_dict.next
     for row in f_dict:
         node_index, node_id = row.rstrip().split(",")
-        index_to_id[node_index] = node_id
+        index_to_id[int(node_index)] = int(node_id)
 
 with open(out_file % num_topics, "wb") as f_out:
     f_out.write("node_id,community_id,member_prob\n")
