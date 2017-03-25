@@ -1,4 +1,5 @@
 import logging
+import sys
 import gensim
 import gensim.models
 import corpus.WPCorpus
