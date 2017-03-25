@@ -31,5 +31,5 @@ with open(out_file % num_topics, "wb") as f_out:
             # Returned fewer topics than we asked for
             break
         for i in range(len(weights)):
-            f_out.write("%d,%d,%f\n" % (i, topic, weights[i]))
+            f_out.write("%d,%d,%f\n" % (index_to_id[i], topic, weights[i]))
     
