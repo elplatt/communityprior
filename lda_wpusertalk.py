@@ -5,7 +5,7 @@ import gensim.models
 import corpus.WPCorpus
 
 dict_file = "data/networks/wpuser-dict.csv"
-out_file = "output/communities/wpusertalk-simplelda-%d"
+out_file = "output/communities/wpusertalk-simplelda-%d.csv"
 # Ground truth: 12093
 num_topics = int(sys.argv[1])
 num_words = 6470
