@@ -17,7 +17,7 @@ wpm = gensim.models.LdaModel(wpc, num_topics=num_topics)
 # Load dictionary
 index_to_id = {}
 with open(dict_file, "rb") as f_dict:
-    f_dict.next
+    f_dict.next()
     for row in f_dict:
         node_index, node_id = row.rstrip().split(",")
         index_to_id[int(node_index)] = int(node_id)
