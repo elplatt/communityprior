@@ -26,7 +26,7 @@ with open(out_file % num_topics, "wb") as f_out:
     f_out.write("node_id,community_id,member_prob")
     for topic in range(num_topics):
         try:
-            weights = wpm.show_topic(topic, num_words)
+            weights = [x[1] for x in wpm.show_topic(topic, num_words)]
         except IndexError:
             # Returned fewer topics than we asked for
             break
