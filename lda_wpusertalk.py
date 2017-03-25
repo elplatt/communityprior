@@ -23,13 +23,13 @@ with open(dict_file, "rb") as f_dict:
         index_to_id[node_index] = node_id
 
 with open(out_file % num_topics, "wb") as f_out:
-    f_out.write("node_id,community_id,member_prob")
+    f_out.write("node_id,community_id,member_prob\n")
     for topic in range(num_topics):
         try:
-            weights = [x[1] for x in wpm.show_topic(topic, num_words)]
+            weights = dict(wpm.show_topic(topic, num_words))
         except IndexError:
             # Returned fewer topics than we asked for
             break
-        for i, w in enumerate(weights):
-            f_out.write("%d,%d,%f\n" % (i, topic, w))
+        for i in range(len(weights)):
+            f_out.write("%d,%d,%f\n" % (i, topic, weights[i]))
     
