@@ -1,6 +1,6 @@
 import sys
 
-import dirichlet
+#import dirichlet
 import numpy as np
 import pandas as pd
 
@@ -41,25 +41,37 @@ def estimate_mle(com_data):
     
     return (alpha, beta)
 
-def estimate_simple(com_data):
+def get_id_to_index(dict_file):
+    id_to_index = {}
+    with open(dict_file, "rb") as f_dict:
+        f_dict.next
+        for row in f_dict:
+            node_index, node_id = row.rstrip().split(",")
+            id_to_index[node_id] = node_index
+    return id_to_index
+
+def estimate_simple(com_data, id_to_index):
     
     # Count number of nodes and communities
-    min_node = int(com_data["node_id"].min())
-    min_com = int(com_data["community_id"].min())
-    num_nodes = com_data['node_id'].max() - min_node + 1
-    num_coms = com_data['community_id'].max() - min_com + 1
+    nodes = set(com_data["node_id"])
+    coms = set(com_data["community_id"])
+    num_nodes = len(nodes)
+    num_coms = len(coms)
+    com_index = {}
+    for i, com_id in enumerate(sorted(list(coms))):
+        com_index[com_id] = i
     
-    print "Estimating %d nodes and %d communities" % (num_nodes, num_coms)
+    print "Estimating %d nodes and %d communities (simple)" % (num_nodes, num_coms)
     
     # Count size of each community, node
     print "Summing weights over all communities, nodes"
     com_nodecount = [0.0] * num_coms
     node_comcount = [0.0] * num_nodes
     for i, row in com_data.iterrows():
-        node_id = int(row['node_id']) - min_node
-        com_id = int(row['community_id']) - min_node
-        node_comcount[node_id] += row['member_prob']
-        com_nodecount[com_id] += row['member_prob']
+        node_index = id_to_index[int(row['node_id'])]
+        com_index = com_index[int(row['community_id'])]
+        node_comcount[node_index] += row['member_prob']
+        com_nodecount[com_index] += row['member_prob']
     
     # Estimate by simple averaging
     # The above totals are used to normalize samples as we add them,
@@ -70,11 +82,11 @@ def estimate_simple(com_data):
     for i, row in com_data.iterrows():
         if i % 1000 == 0:
             print "  %d/%d" % (i, len(com_data))
-        node_id = int(row['node_id']) - min_node
-        com_id = int(row['community_id']) - min_node
+        node_index = id_to_index[int(row['node_id'])]
+        com_index = com_index[int(row['community_id'])]
         mem_p = row['member_prob']
-        alpha[com_id] += mem_p / com_nodecount[com_id]
-        beta[node_id] += mem_p / node_comcount[node_id]
+        alpha[com_id] += mem_p / float(com_nodecount[com_index])
+        beta[node_id] += mem_p / float(node_comcount[node_index])
     
     # Scale using conventional values
     #alpha = 50.0 * alpha
@@ -85,16 +97,17 @@ def estimate_simple(com_data):
 if __name__ == '__main__':
     # Load data
     com_data = pd.DataFrame.from_csv(sys.argv[1], index_col=None)
+    id_to_index = get_id_to_index(sys.argv[2])
     
     # Estimate
-    alpha, beta = estimate_simple(com_data)
+    alpha, beta = estimate_simple(com_data, id_to_index)
     
     # Write output
-    with open(sys.argv[2], "wb") as f:
+    with open(sys.argv[3], "wb") as f:
         f.write("alpha_k\n")
         for alpha_k in alpha:
             f.write("%f\n" % alpha_k)
-    with open(sys.argv[3], "wb") as f:
+    with open(sys.argv[4], "wb") as f:
         f.write("beta_v\n")
         for beta_v in beta:
             f.write("%f\n" % beta_v)
