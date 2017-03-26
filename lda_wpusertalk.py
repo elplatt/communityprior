@@ -30,6 +30,9 @@ with open(out_file % num_topics, "wb") as f_out:
         except IndexError:
             # Returned fewer topics than we asked for
             break
+        print min(weights.keys()), " ", max(weights.keys())
         for i in range(len(weights)):
-            f_out.write("%d,%d,%f\n" % (index_to_id[i], topic, weights[i]))
+            node_id = index_to_id[i]
+            node_weight = weights[i]
+            f_out.write("%d,%d,%f\n" % (node_id, topic, ))
     
