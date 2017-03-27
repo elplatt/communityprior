@@ -15,7 +15,7 @@ def edges_to_corpus():
                 print "  row: %d" % i
             if row[0] == "#":
                 continue
-            source, target = row.rstrip().split(',')
+            source, target = row.rstrip().split(' ')
             source = int(source)
             target = int(target)
             ids.add(source)
