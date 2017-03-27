@@ -44,10 +44,10 @@ def estimate_mle(com_data):
 def get_id_to_index(dict_file):
     id_to_index = {}
     with open(dict_file, "rb") as f_dict:
-        f_dict.next
+        f_dict.next()
         for row in f_dict:
             node_index, node_id = row.rstrip().split(",")
-            id_to_index[node_id] = node_index
+            id_to_index[int(node_id)] = int(node_index)
     return id_to_index
 
 def estimate_simple(com_data, id_to_index):
@@ -57,9 +57,9 @@ def estimate_simple(com_data, id_to_index):
     coms = set(com_data["community_id"])
     num_nodes = len(nodes)
     num_coms = len(coms)
-    com_index = {}
+    com_id_to_index = {}
     for i, com_id in enumerate(sorted(list(coms))):
-        com_index[com_id] = i
+        com_id_to_index[com_id] = i
     
     print "Estimating %d nodes and %d communities (simple)" % (num_nodes, num_coms)
     
@@ -68,8 +68,9 @@ def estimate_simple(com_data, id_to_index):
     com_nodecount = [0.0] * num_coms
     node_comcount = [0.0] * num_nodes
     for i, row in com_data.iterrows():
-        node_index = id_to_index[int(row['node_id'])]
-        com_index = com_index[int(row['community_id'])]
+        node_id = int(row['node_id'])
+        node_index = id_to_index[node_id]
+        com_index = com_id_to_index[int(row['community_id'])]
         node_comcount[node_index] += row['member_prob']
         com_nodecount[com_index] += row['member_prob']
     
@@ -80,17 +81,17 @@ def estimate_simple(com_data, id_to_index):
     alpha = np.zeros((num_coms,))
     beta = np.zeros((num_nodes,))
     for i, row in com_data.iterrows():
-        if i % 1000 == 0:
+        if i % 10000 == 0:
             print "  %d/%d" % (i, len(com_data))
         node_index = id_to_index[int(row['node_id'])]
-        com_index = com_index[int(row['community_id'])]
+        com_index = com_id_to_index[int(row['community_id'])]
         mem_p = row['member_prob']
-        alpha[com_id] += mem_p / float(com_nodecount[com_index])
-        beta[node_id] += mem_p / float(node_comcount[node_index])
+        alpha[com_index] += float(mem_p) / float(node_comcount[node_index])
+        beta[node_index] += float(mem_p) / float(com_nodecount[com_index])
     
     # Scale using conventional values
-    #alpha = 50.0 * alpha
-    #beta = 200.0 * beta
+    alpha = alpha * 50.0 / float(num_nodes)
+    beta = beta * 200.0 / float(num_coms)
     
     return (alpha, beta)
 
