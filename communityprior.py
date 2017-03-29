@@ -90,8 +90,8 @@ def estimate_simple(com_data, id_to_index):
         beta[node_index] += float(mem_p) / float(com_nodecount[com_index])
     
     # Scale using conventional values
-    alpha = alpha * 50.0 / float(num_nodes)
-    beta = beta * 200.0 / float(num_coms)
+    alpha = alpha * 50.0 / float(num_coms)
+    beta = beta * 200.0 / float(num_nodes)
     
     return (alpha, beta)
 
