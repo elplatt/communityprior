@@ -27,7 +27,7 @@ if sys.argv[2] == "double":
     alpha = alpha.append(pd.Series(alpha2))
     num_topics = num_topics * 2
 
-logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s.log' % num_topics, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s.log' % base_method, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
 c = corpus.WPCorpus.WPCorpus()
 m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=list(alpha), eta=list(beta))
 
