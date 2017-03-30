@@ -7,8 +7,8 @@ import corpus.WPCorpus
 
 dict_file = "data/networks/wpuser-dict.csv"
 out_file = "output/communities/wpusertalk-hybrid-%s.csv"
-alpha_file = "output/priors/wpuser-%s-alpha.csv"
-beta_file = "output/priors/wpuser-%s-beta.csv"
+alpha_file = "data/priors/wpuser-%s-alpha.csv"
+beta_file = "data/priors/wpuser-%s-beta.csv"
 base_method = sys.argv[1]
 
 # Load priors
