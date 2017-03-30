@@ -28,7 +28,7 @@ if sys.argv[2] == "double":
 
 logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s.log' % num_topics, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 c = corpus.WPCorpus.WPCorpus()
-m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=alpha, eta=beta)
+m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=list(alpha), eta=list(beta))
 
 # Load dictionary
 index_to_id = {}
