@@ -27,11 +27,12 @@ if sys.argv[2] == "double":
     alpha = alpha.append(pd.Series(alpha2))
     num_topics = num_topics * 2
 
-logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s.log' % num_topics, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s.log' % num_topics, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
 c = corpus.WPCorpus.WPCorpus()
 m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=list(alpha), eta=list(beta))
 
 # Load dictionary
+print "Loading dictionary"
 index_to_id = {}
 with open(dict_file, "rb") as f_dict:
     f_dict.next()
@@ -39,6 +40,7 @@ with open(dict_file, "rb") as f_dict:
         node_index, node_id = row.rstrip().split(",")
         index_to_id[int(node_index)] = int(node_id)
 
+print "Writing output"
 with open(out_file % num_topics, "wb") as f_out:
     f_out.write("node_id,community_id,member_prob\n")
     for topic in range(num_topics):
@@ -47,7 +49,6 @@ with open(out_file % num_topics, "wb") as f_out:
         except IndexError:
             # Returned fewer topics than we asked for
             break
-        print min(weights.keys()), " ", max(weights.keys())
         for i in range(len(weights)):
             node_id = index_to_id[i]
             node_weight = weights[i]
