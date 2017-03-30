@@ -2,6 +2,7 @@ import logging
 import sys
 import gensim
 import gensim.models
+import numpy as np
 import pandas as pd
 import corpus.WPCorpus
 
@@ -21,7 +22,7 @@ num_nodes = len(beta)
 
 # Double communities for nonoverlapping base methods
 if sys.argv[2] == "double":
-    alpha2 = numpy.ones(num_topics) * 50.0 / float(num_coms)
+    alpha2 = np.ones(num_topics) * 50.0 / float(num_coms)
     alpha = alpha.append(np.Series(alpha2))
     num_topics = num_topics * 2
 
