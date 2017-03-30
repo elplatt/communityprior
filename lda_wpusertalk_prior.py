@@ -18,10 +18,11 @@ alpha = alpha_df['alpha_k']
 beta_df = pd.DataFrame.from_csv(beta_file % base_method, index_col=None)
 beta = beta_df['beta_v']
 num_topics = len(alpha)
-num_nodes = len(beta)
+num_words = len(beta)
 
 # Double communities for nonoverlapping base methods
 if sys.argv[2] == "double":
+    print "Extending alpha vector"
     alpha2 = np.ones(num_topics) * 50.0 / float(num_topics)
     alpha = alpha.append(pd.Series(alpha2))
     num_topics = num_topics * 2
