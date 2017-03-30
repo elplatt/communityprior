@@ -22,7 +22,7 @@ num_nodes = len(beta)
 
 # Double communities for nonoverlapping base methods
 if sys.argv[2] == "double":
-    alpha2 = np.ones(num_topics) * 50.0 / float(num_coms)
+    alpha2 = np.ones(num_topics) * 50.0 / float(num_topics)
     alpha = alpha.append(np.Series(alpha2))
     num_topics = num_topics * 2
 
