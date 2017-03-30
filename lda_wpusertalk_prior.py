@@ -41,7 +41,7 @@ with open(dict_file, "rb") as f_dict:
         index_to_id[int(node_index)] = int(node_id)
 
 print "Writing output"
-with open(out_file % num_topics, "wb") as f_out:
+with open(out_file % base_method, "wb") as f_out:
     f_out.write("node_id,community_id,member_prob\n")
     for topic in range(num_topics):
         try:
