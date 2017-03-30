@@ -23,7 +23,7 @@ num_nodes = len(beta)
 # Double communities for nonoverlapping base methods
 if sys.argv[2] == "double":
     alpha2 = np.ones(num_topics) * 50.0 / float(num_topics)
-    alpha = alpha.append(np.Series(alpha2))
+    alpha = alpha.append(pd.Series(alpha2))
     num_topics = num_topics * 2
 
 logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s.log' % num_topics, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
