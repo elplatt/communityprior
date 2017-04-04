@@ -73,19 +73,20 @@ def get_joint_dist(weights_a, weights_b):
     start = time.time()
     last = start
     one_norm = 1.0 / float(num_nodes)
-    for node in range(num_nodes):
-        for com_a in range(num_coms_a):
-            w_a = weights_a[node,com_a] / float(num_nodes)
-            for com_b in range(num_coms_b):
-                w_b = weights_b[node,com_b] / float(num_nodes)
-                m = min(w_a,w_b)
-                a_b[com_a,com_b] += m
-                a_notb += w_a - m
-                nota_b += w_b - m
-                done += 1
-                if time.time() - last >= 60:
-                    print "%d/%d (%2.4f%%)" % (done, total, 100.0 * done / float(total))
-                    last = time.time()
+    try:
+        for node in range(num_nodes):
+            for com_a in range(num_coms_a):
+                w_a = weights_a[node,com_a] / float(num_nodes)
+                for com_b in range(num_coms_b):
+                    w_b = weights_b[node,com_b] / float(num_nodes)
+                    m = min(w_a,w_b)
+                    a_b[com_a,com_b] += m
+                    a_notb += w_a - m
+                    nota_b += w_b - m
+                    done += 1
+    except KeyboardInterrupt:
+        print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
+        raise
     print "Finished calculating joint distribution"
 
     return (a_b, a_notb, nota_b)
