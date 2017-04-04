@@ -15,8 +15,7 @@ def weighted_overlapping(a, b):
     # Translate from ids to indexes
     node_ids = sorted(list(set(a["node_id"]).union(set(b["node_id"]))))
     num_nodes = len(node_ids)
-    id_to_index_a = {}
-    id_to_index_b = {}
+    id_to_index = {}
     for node_index, node_id in enumerate(node_ids):
         id_to_index[node_id] = node_index
     
