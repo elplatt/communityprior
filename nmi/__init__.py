@@ -55,6 +55,8 @@ def weighted_overlapping(a, b):
     # Get joint distribution and entropies
     a_b, a_notb, nota_b = get_joint_dist(weights_a, weights_b)
     
+    return _wo_from_joint(a_b, a_notb, nota_b)
+    
 def get_joint_dist(weights_a, weights_b):
     num_nodes, num_coms_a = weights_a.shape
     num_nodes, num_coms_b = weights_b.shape    
@@ -120,10 +122,38 @@ def get_H_marginal(a_b, a_notb, nota_b):
         H_k[com_a] += -1.0 * (1.0 - a) * math.log(1.0 - a, 2)
     return H_k
 
-def get_H_norm_conditional(a_b, a_notb, nota_b):
+def _wo_from_joint(a_b, a_notb, nota_b):
     '''LFK B.11'''
     num_coms_a, num_coms_b = a_b.shape
     H_kl = get_H_joint(a_b, a_notb, nota_b)
     H_k = get_H_marginal(a_b, a_notb, nota_b)
     H_l = get_H_marginal(a_b.transpose(), nota_b.transpose(), a_notb.transpose())
+        
+    # LFK B.11
+    H_cond_a = 0.0
+    for k in range(num_coms_a):
+        H_xk_given_y = 0.0
+        # Find conditional entropy for community k (B.9)
+        for l in range(num_coms_b):
+            H_xk_given_yl = H_kl[k,l] - H_l[l]
+            if l == 0 or H_xk_given_yl < H_xk_given_y:
+                H_xk_given_y = H_xk_given_yl
+        # Normalize and add to total
+        H_cond_a += H_xk_given_y / H_k[k]
+    # Normalize
+    H_cond_a /= num_coms_a
     
+    H_cond_b = 0.0
+    for l in range(num_coms_b):
+        H_yl_given_x = 0.0
+        # Find conditional entropy for community k (B.9)
+        for k in range(num_coms_a):
+            H_yl_given_xk = H_kl[k,l] - H_k[k]
+            if l == 0 or H_yl_given_xk < H_yl_given_x:
+                H_yl_given_x = H_yl_given_xk
+        # Normalize and add to total
+        H_cond_b += H_yl_given_x / H_l[l]
+    # Normalize
+    H_cond_b /= num_coms_b
+    
+    return 1.0 - (H_cond_a + H_cond_b) / 2.0
