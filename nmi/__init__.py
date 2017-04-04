@@ -27,7 +27,7 @@ def weighted_overlapping(a, b):
     weights_b = np.zeros((num_nodes, num_coms_b))
     node_max_a = np.zeros(num_nodes)
     node_max_b = np.zeros(num_nodes)
-    for row in a.iterrows():
+    for i, row in a.iterrows():
         # Set weight
         node_id = row["node_id"]
         node = id_to_index[node_id]
@@ -37,7 +37,7 @@ def weighted_overlapping(a, b):
         # Check node's max weight for normalization
         if w > node_max_a[node]:
             node_max_a[node] = w
-    for row in b.iterrows():
+    for i, row in b.iterrows():
         # Set weight
         node = id_to_index[row["node_id"]]
         com = row["community_id"]
