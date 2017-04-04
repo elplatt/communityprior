@@ -21,6 +21,7 @@ def weighted_overlapping(a, b):
         id_to_index[node_id] = node_index
     
     # Construct node-community matrix, cells are membership weights
+    print "Constructing weight matrices"
     num_coms_a = a["community_id"].max() + 1
     num_coms_b = b["community_id"].max() + 1
     weights_a = np.zeros((num_nodes, num_coms_a))
@@ -49,6 +50,7 @@ def weighted_overlapping(a, b):
     # Normalize weight matrices
     # np.divide(a,b) divides each row of a by the elements of b component-wise
     # We want to all entries for a node (rows) by the same element of b, so transpose
+    print "Normalizing weights"
     weights_a = np.divide(weights_a.transpose(), node_max_a).transpose()
     weights_b = np.divide(weights_b.transpose(), node_max_b).transpose()
     
@@ -96,6 +98,7 @@ def get_H_joint(a_b, a_notb, nota_b):
     done = 1.0
     start = time.time()
     last = start
+    print "Caclulating joint entropy"
     for com_a in range(num_coms_a):
         for com_b in range(num_coms_b):
             # Calculate pairwise
@@ -116,6 +119,7 @@ def get_H_marginal(a_b, a_notb, nota_b):
     num_coms_a, num_coms_b = a_b.shape
     H_k = np.zeros(num_coms_a)
     # Calculate marginal entropy for a
+    print "Calculating marginal entropy"
     for com_a in range(num_coms_a):
         p_a = a_b[com_a,:].sum() + a_notb[com_a,:].sum()
         H_k[com_a] += -1.0 * p_a * math.log(p_a, 2)
@@ -130,6 +134,7 @@ def _wo_from_joint(a_b, a_notb, nota_b):
     H_l = get_H_marginal(a_b.transpose(), nota_b.transpose(), a_notb.transpose())
         
     # LFK B.11
+    print "Calculating normalized conditional entropy"
     H_cond_a = 0.0
     for k in range(num_coms_a):
         H_xk_given_y = 0.0
@@ -143,6 +148,7 @@ def _wo_from_joint(a_b, a_notb, nota_b):
     # Normalize
     H_cond_a /= num_coms_a
     
+    print "Calculating normalized conditional entropy"
     H_cond_b = 0.0
     for l in range(num_coms_b):
         H_yl_given_x = 0.0
