@@ -81,8 +81,8 @@ def get_joint_dist(weights_a, weights_b):
                     w_b = weights_b[node,com_b] / float(num_nodes)
                     m = min(w_a,w_b)
                     a_b[com_a,com_b] += m
-                    a_notb += w_a - m
-                    nota_b += w_b - m
+                    a_notb[com_a,com_b] += w_a - m
+                    nota_b[com_a,com_b] += w_b - m
                     done += 1
     except KeyboardInterrupt:
         print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
