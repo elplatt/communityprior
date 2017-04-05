@@ -3,7 +3,7 @@ import time
 import numpy as np
 import pandas as pd
 
-def weighted_overlapping(a, b):
+def weighted_overlapping(a, b, normalize=True):
     '''Calculate NMI for two covers with overlapping communities and weighted
     memberships.
     Arguments should be two covers with the following columns:
@@ -12,6 +12,14 @@ def weighted_overlapping(a, b):
     - member_prob
     '''
     
+    weights_a, weights_b = get_weights(a, b, normalize)
+    
+    # Get joint distribution and entropies
+    a_b, a_notb, nota_b = get_joint_dist(weights_a, weights_b)
+    
+    return _wo_from_joint(a_b, a_notb, nota_b)
+
+def get_weights(a, b, normalize):
     # Translate from ids to indexes
     node_ids = sorted(list(set(a["node_id"]).union(set(b["node_id"]))))
     num_nodes = len(node_ids)
@@ -48,16 +56,14 @@ def weighted_overlapping(a, b):
             node_max_b[node] = w
     
     # Normalize weight matrices
-    # np.divide(a,b) divides each row of a by the elements of b component-wise
-    # We want to all entries for a node (rows) by the same element of b, so transpose
-    print "Normalizing weights"
-    weights_a = np.divide(weights_a.transpose(), node_max_a).transpose()
-    weights_b = np.divide(weights_b.transpose(), node_max_b).transpose()
-    
-    # Get joint distribution and entropies
-    a_b, a_notb, nota_b = get_joint_dist(weights_a, weights_b)
-    
-    return _wo_from_joint(a_b, a_notb, nota_b)
+    if normalize:
+        print "Normalizing weights"
+        # np.divide(a,b) divides each row of a by the elements of b component-wise
+        # We want to all entries for a node (rows) by the same element of b, so transpose
+        weights_a = np.divide(weights_a.transpose(), node_max_a).transpose()
+        weights_b = np.divide(weights_b.transpose(), node_max_b).transpose()
+        
+    return (weights_a, weights_b)
     
 def get_joint_dist(weights_a, weights_b):
     num_nodes, num_coms_a = weights_a.shape
