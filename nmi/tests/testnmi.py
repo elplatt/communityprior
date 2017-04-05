@@ -43,6 +43,9 @@ true_nota_b = np.array([
     [0, 0]
 ])
 
+true_a_marginal = np.array([0.5, 0.875])
+true_b_marginal = np.array([0.5, 0.625])
+
 class TestAll(unittest.TestCase):
     
     def test_weights(self):
@@ -55,6 +58,12 @@ class TestAll(unittest.TestCase):
         nptest.assert_array_almost_equal(a_b, true_a_b)
         nptest.assert_array_almost_equal(a_notb, true_a_notb)
         nptest.assert_array_almost_equal(nota_b, true_nota_b)
+    
+    def test_marginals(self):
+        a_marginal = nmi.get_marginal(true_weights_a)
+        b_marginal = nmi.get_marginal(true_weights_b)
+        nptest.assert_array_almost_equal(a_marginal, true_a_marginal)
+        nptest.assert_array_almost_equal(b_marginal, true_b_marginal)
         
 if __name__ == '__main__':
     unittest.main()

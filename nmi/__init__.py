@@ -11,13 +11,11 @@ def weighted_overlapping(a, b, normalize=True):
     - community_id
     - member_prob
     '''
-    
     weights_a, weights_b = get_weights(a, b, normalize)
-    
-    # Get joint distribution and entropies
     a_b, a_notb, nota_b = get_joint_dist(weights_a, weights_b)
-    
-    return _wo_from_joint(a_b, a_notb, nota_b)
+    a_marginal = get_marginal(weights_a)
+    b_marginal = get_marginal(weights_b)
+    return _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal)
 
 def get_weights(a, b, normalize):
     # Translate from ids to indexes
@@ -39,7 +37,7 @@ def get_weights(a, b, normalize):
         # Set weight
         node_id = row["node_id"]
         node = id_to_index[node_id]
-        com = row["community_id"]
+        com = int(row["community_id"])
         w = row["member_prob"]
         weights_a[node,com] = w
         # Check node's max weight for normalization
@@ -48,7 +46,7 @@ def get_weights(a, b, normalize):
     for i, row in b.iterrows():
         # Set weight
         node = id_to_index[row["node_id"]]
-        com = row["community_id"]
+        com = int(row["community_id"])
         w = row["member_prob"]
         weights_b[node,com] = w
         # Check node's max weight for normalization
@@ -97,6 +95,11 @@ def get_joint_dist(weights_a, weights_b):
 
     return (a_b, a_notb, nota_b)
 
+def get_marginal(weights):
+    num_nodes, num_coms = weights.shape
+    p = weights.sum(axis=0) / float(num_nodes)
+    return p
+
 def get_H_joint(a_b, a_notb, nota_b):
     num_coms_a, num_coms_b = a_b.shape
     H_kl = np.zeros((num_coms_a,num_coms_b))
@@ -122,23 +125,15 @@ def get_H_joint(a_b, a_notb, nota_b):
     print "Done calculating joint entropy"
     return H_kl
 
-def get_H_marginal(a_b, a_notb, nota_b):
-    num_coms_a, num_coms_b = a_b.shape
-    H_k = np.zeros(num_coms_a)
-    # Calculate marginal entropy for a
-    print "Calculating marginal entropy"
-    for com_a in range(num_coms_a):
-        p_a = a_b[com_a,:].sum() + a_notb[com_a,:].sum()
-        H_k[com_a] += -1.0 * p_a * math.log(p_a, 2)
-        H_k[com_a] += -1.0 * (1.0 - a) * math.log(1.0 - a, 2)
-    return H_k
+def get_H_marginal(p_marginal):
+    return -1.0 * (p*np.log2(p) + (1-p)*np.log2(1-p))
 
-def _wo_from_joint(a_b, a_notb, nota_b):
+def _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
     '''LFK B.11'''
     num_coms_a, num_coms_b = a_b.shape
     H_kl = get_H_joint(a_b, a_notb, nota_b)
-    H_k = get_H_marginal(a_b, a_notb, nota_b)
-    H_l = get_H_marginal(a_b.transpose(), nota_b.transpose(), a_notb.transpose())
+    H_k = get_H_marginal(a_marginal)
+    H_l = get_H_marginal(b_marginal)
         
     # LFK B.11
     print "Calculating normalized conditional entropy"
