@@ -151,6 +151,7 @@ def _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
         for l in range(num_coms_b):
             H_xk_given_yl = H_kl[k,l] - H_l[l]
             if l == 0 or H_xk_given_yl < H_xk_given_y:
+                #print "For k=%d, using %d" % (k, l)
                 H_xk_given_y = H_xk_given_yl
         # Normalize and add to total
         H_cond_a += H_xk_given_y / H_k[k]
@@ -164,7 +165,8 @@ def _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
         # Find conditional entropy for community k (B.9)
         for k in range(num_coms_a):
             H_yl_given_xk = H_kl[k,l] - H_k[k]
-            if l == 0 or H_yl_given_xk < H_yl_given_x:
+            if k == 0 or H_yl_given_xk < H_yl_given_x:
+                #print "For l=%d, using %d" % (l, k)
                 H_yl_given_x = H_yl_given_xk
         # Normalize and add to total
         H_cond_b += H_yl_given_x / H_l[l]
