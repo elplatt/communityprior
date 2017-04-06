@@ -104,7 +104,7 @@ def get_H_joint(a_b, a_notb, nota_b):
     num_coms_a, num_coms_b = a_b.shape
     H_kl = np.zeros((num_coms_a,num_coms_b))
     print "Calculating joint entropy"
-    total = float(com_a * com_b)
+    total = float(num_coms_a * num_coms_b)
     done = 1.0
     start = time.time()
     last = start
@@ -112,11 +112,17 @@ def get_H_joint(a_b, a_notb, nota_b):
     for com_a in range(num_coms_a):
         for com_b in range(num_coms_b):
             # Calculate pairwise
-            h = -1.0 * a_b[com_a,com_b] * math.log(a_b[com_a,com_b],2)
-            h += -1.0 * a_notb[com_a,com_b] * math.log(a_notb[com_a,com_b], 2)
-            h += -1.0 * nota_b[com_a,com_b] * math.log(nota_b[com_a,com_b], 2)
+            if a_b[com_a,com_b] > 0.0:
+                h = -1.0 * a_b[com_a,com_b] * math.log(a_b[com_a,com_b],2)
+            else:
+                h = 0.0
+            if a_notb[com_a,com_b] > 0.0:
+                h += -1.0 * a_notb[com_a,com_b] * math.log(a_notb[com_a,com_b], 2)
+            if nota_b[com_a,com_b] > 0.0:
+                h += -1.0 * nota_b[com_a,com_b] * math.log(nota_b[com_a,com_b], 2)
             nota_notb = 1.0 - a_b[com_a,com_b] - a_notb[com_a,com_b] - nota_b[com_a,com_b]
-            h += -1.0 * nota_notb * math.log(nota_notb, 2)
+            if nota_notb > 0.0:
+                h += -1.0 * nota_notb * math.log(nota_notb, 2)
             H_kl[com_a,com_b] = h
             if time.time() - last >= 60:
                 done += 1.0

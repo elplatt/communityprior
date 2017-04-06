@@ -1,3 +1,4 @@
+import math
 import unittest
 import numpy as np
 import numpy.testing as nptest
@@ -46,6 +47,13 @@ true_nota_b = np.array([
 true_a_marginal = np.array([0.5, 0.875])
 true_b_marginal = np.array([0.5, 0.625])
 
+true_H_kl = np.array([
+    [3.0 - (3.0/4.0)*math.log(3,2),
+     5.0/2.0 - (3.0/8.0)*math.log(3,2)],
+    [2.0 - (3.0/8.0)*math.log(3,2),
+     11.0/4.0 - (5.0/8.0)*math.log(5,2)]
+])
+
 class TestAll(unittest.TestCase):
     
     def test_weights(self):
@@ -64,6 +72,10 @@ class TestAll(unittest.TestCase):
         b_marginal = nmi.get_marginal(true_weights_b)
         nptest.assert_array_almost_equal(a_marginal, true_a_marginal)
         nptest.assert_array_almost_equal(b_marginal, true_b_marginal)
+        
+    def test_H_joint(self):
+        H_kl = nmi.get_H_joint(true_a_b, true_a_notb, true_nota_b)
+        nptest.assert_array_almost_equal(H_kl, true_H_kl)
         
 if __name__ == '__main__':
     unittest.main()
