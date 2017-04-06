@@ -53,6 +53,16 @@ def get_weights(a, b, normalize):
         if w > node_max_b[node]:
             node_max_b[node] = w
     
+    # Handle nodes that have no community
+    # Their max weight will be 0, so we can't divide by it, but we can divide by
+    # anything else and get all 0s. So we'll change to 1.
+    for node, node_max in enumerate(node_max_a):
+        if node_max == 0:
+            node_max_a[node] = 1.0
+    for node, node_max in enumerate(node_max_b):
+        if node_max == 0:
+            node_max_b[node] = 1.0
+    
     # Normalize weight matrices
     if normalize:
         print "Normalizing weights"
