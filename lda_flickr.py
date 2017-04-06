@@ -33,5 +33,5 @@ with open(out_file % num_topics, "wb") as f_out:
         for i in range(len(weights)):
             node_id = index_to_id[i]
             node_weight = weights[i]
-            f_out.write("%d,%d,%f\n" % (node_id, topic, node_weight))
+            f_out.write("%d,%d,%s\n" % (node_id, topic, repr(node_weight)))
     
