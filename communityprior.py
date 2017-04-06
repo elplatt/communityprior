@@ -107,8 +107,8 @@ if __name__ == '__main__':
     with open(sys.argv[3], "wb") as f:
         f.write("alpha_k\n")
         for alpha_k in alpha:
-            f.write("%f\n" % alpha_k)
+            f.write(repr(alpha_k))
     with open(sys.argv[4], "wb") as f:
         f.write("beta_v\n")
         for beta_v in beta:
-            f.write("%f\n" % beta_v)
+            f.write(repr(beta_v))
