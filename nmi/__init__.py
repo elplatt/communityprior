@@ -88,6 +88,10 @@ def get_joint_dist(weights_a, weights_b):
                     a_notb[com_a,com_b] += w_a - m
                     nota_b[com_a,com_b] += w_b - m
                     done += 1
+                t = time.time()
+                if t - start > 60:
+                    print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
+                    last = t
     except KeyboardInterrupt:
         print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
         raise
