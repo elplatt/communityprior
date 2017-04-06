@@ -57,10 +57,10 @@ def get_weights(a, b, normalize):
     if normalize:
         print "Normalizing weights"
         # Check for zeros
-        if weights_a.count_nonzero() != weights_a.size:
+        if np.count_nonzero(weights_a) != weights_a.size:
             print "Zero weights present in a"
             sys.exit()
-        if weights_b.count_nonzero() != weights_b.size:
+        if np.count_nonzero(weights_b) != weights_b.size:
             print "Zero weights present in b"
             sys.exit()
         # np.divide(a,b) divides each row of a by the elements of b component-wise
