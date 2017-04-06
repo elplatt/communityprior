@@ -148,11 +148,42 @@ def _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
     for k in range(num_coms_a):
         H_xk_given_y = 0.0
         # Find conditional entropy for community k (B.9)
+        empty = True
         for l in range(num_coms_b):
+            # Constraint B.14
+            p11 = a_b[k,l]
+            p10 = a_notb[k,l]
+            p01 = nota_b[k,l]
+            p00 = 1.0 - p11 - p10 - p01
+            h11 = 0.0
+            h00 = 0.0
+            h10 = 0.0
+            h01 = 0.0
+            if p11 > 0:
+                h11 -= p11*math.log(p11,2)
+            if p11 < 1:
+                h11 -= (1.0-p11)*math.log(1.0-p11,2)
+            if p00 > 0:
+                h00 -= p00*math.log(p00,2)
+            if p00 < 1:
+                h00 -= (1.0-p00)*math.log(1.0-p00,2)
+            if p10 > 0:
+                h10 -= p10*math.log(p10,2)
+            if p10 < 1:
+                h10 -= (1.0-p10)*math.log(1.0-p10,2)
+            if p01 > 0:
+                h01 -= p01*math.log(p01,2)
+            if p01 < 1:
+                h01 -= (1.0-p01)*math.log(1.0-p01,2)
+            if h11 + h00 < h01 + h10:
+                # Constraint not satisfied
+                continue
+            # Passed constraint, compare to current min
             H_xk_given_yl = H_kl[k,l] - H_l[l]
-            if l == 0 or H_xk_given_yl < H_xk_given_y:
+            if empty or H_xk_given_yl < H_xk_given_y:
                 #print "For k=%d, using %d" % (k, l)
                 H_xk_given_y = H_xk_given_yl
+                empty = False
         # Normalize and add to total
         H_cond_a += H_xk_given_y / H_k[k]
     # Normalize
@@ -163,11 +194,42 @@ def _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
     for l in range(num_coms_b):
         H_yl_given_x = 0.0
         # Find conditional entropy for community k (B.9)
+        empty = True
         for k in range(num_coms_a):
+            # Constraint B.14
+            p11 = a_b[k,l]
+            p10 = a_notb[k,l]
+            p01 = nota_b[k,l]
+            p00 = 1.0 - p11 - p10 - p01
+            h11 = 0.0
+            h00 = 0.0
+            h10 = 0.0
+            h01 = 0.0
+            if p11 > 0:
+                h11 -= p11*math.log(p11,2)
+            if p11 < 1:
+                h11 -= (1.0-p11)*math.log(1.0-p11,2)
+            if p00 > 0:
+                h00 -= p00*math.log(p00,2)
+            if p00 < 1:
+                h00 -= (1.0-p00)*math.log(1.0-p00,2)
+            if p10 > 0:
+                h10 -= p10*math.log(p10,2)
+            if p10 < 1:
+                h10 -= (1.0-p10)*math.log(1.0-p10,2)
+            if p01 > 0:
+                h01 -= p01*math.log(p01,2)
+            if p01 < 1:
+                h01 -= (1.0-p01)*math.log(1.0-p01,2)
+            if h11 + h00 < h01 + h10:
+                # Constraint not satisfied
+                continue
+            # Passed constraint, compare to current min
             H_yl_given_xk = H_kl[k,l] - H_k[k]
-            if k == 0 or H_yl_given_xk < H_yl_given_x:
+            if empty or H_yl_given_xk < H_yl_given_x:
                 #print "For l=%d, using %d" % (l, k)
                 H_yl_given_x = H_yl_given_xk
+                empty = False
         # Normalize and add to total
         H_cond_b += H_yl_given_x / H_l[l]
     # Normalize

@@ -106,7 +106,11 @@ class TestAll(unittest.TestCase):
         N = nmi._wo_from_joint(
             true_a_b, true_a_notb, true_nota_b,
             true_a_marginal, true_b_marginal)
-        nptest.assert_array_almost_equal(N, true_N)
+        self.assertAlmostEqual(N, true_N)
+    
+    def test_integrated(self):
+        N = nmi.weighted_overlapping(df_a, df_b, normalize=False)
+        self.assertAlmostEqual(N, true_N)
         
 if __name__ == '__main__':
     unittest.main()
