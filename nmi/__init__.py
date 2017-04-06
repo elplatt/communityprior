@@ -56,6 +56,13 @@ def get_weights(a, b, normalize):
     # Normalize weight matrices
     if normalize:
         print "Normalizing weights"
+        # Check for zeros
+        if weights_a.count_nonzero() != weights_a.size:
+            print "Zero weights present in a"
+            sys.exit()
+        if weights_b.count_nonzero() != weights_b.size:
+            print "Zero weights present in b"
+            sys.exit()
         # np.divide(a,b) divides each row of a by the elements of b component-wise
         # We want to all entries for a node (rows) by the same element of b, so transpose
         weights_a = np.divide(weights_a.transpose(), node_max_a).transpose()
