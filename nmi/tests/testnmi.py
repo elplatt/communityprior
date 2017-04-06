@@ -54,6 +54,11 @@ true_H_kl = np.array([
      11.0/4.0 - (5.0/8.0)*math.log(5,2)]
 ])
 
+true_H_k = np.array([
+    1.0,
+    3.0 - (7.0/8.0)*math.log(7,2)
+])
+
 class TestAll(unittest.TestCase):
     
     def test_weights(self):
@@ -76,6 +81,9 @@ class TestAll(unittest.TestCase):
     def test_H_joint(self):
         H_kl = nmi.get_H_joint(true_a_b, true_a_notb, true_nota_b)
         nptest.assert_array_almost_equal(H_kl, true_H_kl)
-        
+    
+    def test_H_marginal(self):
+        H_k = nmi.get_H_marginal(true_a_marginal)
+        nptest.assert_array_almost_equal(H_k, true_H_k)
 if __name__ == '__main__':
     unittest.main()

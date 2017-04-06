@@ -131,7 +131,8 @@ def get_H_joint(a_b, a_notb, nota_b):
     print "Done calculating joint entropy"
     return H_kl
 
-def get_H_marginal(p_marginal):
+def get_H_marginal(p):
+    '''Argument is array of P(node in community k).'''
     return -1.0 * (p*np.log2(p) + (1-p)*np.log2(1-p))
 
 def _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
