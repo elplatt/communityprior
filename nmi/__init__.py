@@ -1,4 +1,5 @@
 import math
+import sys
 import time
 import numpy as np
 import pandas as pd
@@ -67,10 +68,10 @@ def get_weights(a, b, normalize):
     if normalize:
         print "Normalizing weights"
         # Check for zeros
-        if np.count_nonzero(weights_a) != weights_a.size:
+        if np.count_nonzero(node_max_a) != node_max_a.size:
             print "Zero weights present in a"
             sys.exit()
-        if np.count_nonzero(weights_b) != weights_b.size:
+        if np.count_nonzero(node_max_b) != node_max_b.size:
             print "Zero weights present in b"
             sys.exit()
         # np.divide(a,b) divides each row of a by the elements of b component-wise
