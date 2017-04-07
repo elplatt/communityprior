@@ -5,6 +5,89 @@ import numpy as np
 import pandas as pd
 import scipy.stats as spstats
 
+def unweighted_overlapping(a, b):
+    '''Calculate NMI for two covers with overlapping communities and unweighted
+    memberships.
+    Arguments should be two covers with the following columns:
+    - node_id
+    - community_id
+    - member_prob (1 or 0)
+    '''
+    member_a, member_b, num_nodes = get_membership(a, b)
+    a_b, a_notb, nota_b = get_unweighted_joint_dist(member_a, member_b, num_nodes)
+    a_marginal = get_unweighted_marginal(member_a, num_nodes)
+    b_marginal = get_unweighted_marginal(member_b, num_nodes)
+    return _from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal)
+
+def get_membership(a, b):
+    # Translate from ids to indexes
+    node_ids = sorted(list(set(a["node_id"]).union(set(b["node_id"]))))
+    num_nodes = len(node_ids)
+    id_to_index = {}
+    for node_index, node_id in enumerate(node_ids):
+        id_to_index[node_id] = node_index
+    
+    # Construct node-community matrix, cells are membership weights
+    print "Constructing membership matrices"
+    num_coms_a = a["community_id"].max() + 1
+    num_coms_b = b["community_id"].max() + 1
+    # Represent each community as a set of member nodes
+    member_a = [set() for x in range(num_coms_a)]
+    member_b = [set() for x in range(num_coms_b)]
+    for i, row in a.iterrows():
+        # Set weight
+        node_id = row["node_id"]
+        node = id_to_index[node_id]
+        com = int(row["community_id"])
+        w = int(row["member_prob"])
+        if w == 1:
+            member_a[com].add(node)
+    for i, row in b.iterrows():
+        # Set weight
+        node = id_to_index[row["node_id"]]
+        com = int(row["community_id"])
+        w = int(row["member_prob"])
+        if w == 1:
+            member_b.add(node)     
+    return (member_a, member_b, num_nodes)
+
+def get_unweighted_joint_dist(member_a, member_b, num_nodes):
+    num_coms_a = len(member_a)
+    num_coms_b = len(member_b)
+    a_b = np.zeros((num_coms_a, num_coms_b))
+    a_notb = np.zeros((num_coms_a, num_coms_b))
+    nota_b = np.zeros((num_coms_a, num_coms_b))
+    # To save memory, we can find nota_notb from normalization
+    
+    print "Calculating joint distribution"
+    total = num_coms_a * num_coms_b
+    done = 0
+    start = time.time()
+    last = start
+    try:
+        for nodes_a in member_a:
+            for nodes_b in member_b:
+                a_b[com_a,com_b] = len(nodes_a.intersection(nodes_b))
+                a_notb[com_a,com_b] = len(nodes_a.difference(nodes_b))
+                nota_b[com_a,com_b] = len(nodes_b.difference(nodes_a))
+                done += 1
+            t = time.time()
+            if t - last > 60:
+                print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
+                last = t
+    except KeyboardInterrupt:
+        print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
+        raise
+    a_b = a_b / float(num_nodes)
+    a_notb = a_notb / float(num_nodes)
+    nota_b = nota_b / float(num_nodes)
+    print "Finished calculating joint distribution"
+    return (a_b, a_notb, nota_b)
+
+def get_unweighted_marginal(member, num_nodes):
+    p = np.array([len(x) for x in member]) / float(num_nodes)
+    return p
+
 def weighted_overlapping(a, b, normalize=True):
     '''Calculate NMI for two covers with overlapping communities and weighted
     memberships.
@@ -17,7 +100,7 @@ def weighted_overlapping(a, b, normalize=True):
     a_b, a_notb, nota_b = get_joint_dist(weights_a, weights_b)
     a_marginal = get_marginal(weights_a)
     b_marginal = get_marginal(weights_b)
-    return _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal)
+    return _from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal)
 
 def get_weights(a, b, normalize):
     # Translate from ids to indexes
@@ -55,19 +138,18 @@ def get_weights(a, b, normalize):
         if w > node_max_b[node]:
             node_max_b[node] = w
     
-    # Handle nodes that have no community
-    # Their max weight will be 0, so we can't divide by it, but we can divide by
-    # anything else and get all 0s. So we'll change to 1.
-    for node, node_max in enumerate(node_max_a):
-        if node_max == 0:
-            node_max_a[node] = 1.0
-    for node, node_max in enumerate(node_max_b):
-        if node_max == 0:
-            node_max_b[node] = 1.0
-    
     # Normalize weight matrices
     if normalize:
-        print "Normalizing weights"
+        print "Normalizing weights"        
+        # Handle nodes that have no community
+        # Their max weight will be 0, so we can't divide by it, but we can divide by
+        # anything else and get all 0s. So we'll change to 1.
+        for node, node_max in enumerate(node_max_a):
+            if node_max == 0:
+                node_max_a[node] = 1.0
+        for node, node_max in enumerate(node_max_b):
+            if node_max == 0:
+                node_max_b[node] = 1.0
         # Check for zeros
         if np.count_nonzero(node_max_a) != node_max_a.size:
             print "Zero weights present in a"
@@ -162,7 +244,7 @@ def get_H_marginal(p):
     # Now we can pass the array to scipy to get the entropy
     return spstats.entropy(pp.transpose(), base=2)
 
-def _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
+def _from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
     '''LFK B.11'''
     num_coms_a, num_coms_b = a_b.shape
     H_kl = get_H_joint(a_b, a_notb, nota_b)
