@@ -75,7 +75,21 @@ true_N = 1.0 - (
     )
 )
 
-class TestAll(unittest.TestCase):
+# Unweighted
+
+df_a_uw = pd.DataFrame.from_dict({
+    "node_id": [0, 1, 2, 0, 1, 2],
+    "community_id": [0, 0, 0, 1, 1, 2],
+    "member_prob": [1, 1, 1, 1, 1, 1]
+})
+
+df_b_uw = pd.DataFrame.from_dict({
+    "node_id": [0, 2, 0, 1, 1, 2],
+    "community_id": [0, 0, 1, 1, 2, 2],
+    "member_prob": [1, 1, 1, 1, 1, 1]
+})
+
+class TestWeighted(unittest.TestCase):
     
     def test_weights(self):
         weights_a, weights_b = nmi.get_weights(df_a, df_b, normalize=False)
@@ -111,6 +125,13 @@ class TestAll(unittest.TestCase):
     def test_integrated(self):
         N = nmi.weighted_overlapping(df_a, df_b, normalize=False)
         self.assertAlmostEqual(N, true_N)
-        
+
+class TestReduction(unittest.TestCase):
+    
+    def test_recuction(self):
+        N_w = nmi.weighted_overlapping(df_a_uw, df_b_uw)
+        N_uw = nmi.unweighted_overlapping(df_a_uw, df_b_uw)
+        self.assertAlmostEqual(N_w, N_uw)
+
 if __name__ == '__main__':
     unittest.main()

@@ -48,7 +48,7 @@ def get_membership(a, b):
         com = int(row["community_id"])
         w = int(row["member_prob"])
         if w == 1:
-            member_b.add(node)     
+            member_b[com].add(node)     
     return (member_a, member_b, num_nodes)
 
 def get_unweighted_joint_dist(member_a, member_b, num_nodes):
@@ -65,8 +65,8 @@ def get_unweighted_joint_dist(member_a, member_b, num_nodes):
     start = time.time()
     last = start
     try:
-        for nodes_a in member_a:
-            for nodes_b in member_b:
+        for com_a, nodes_a in enumerate(member_a):
+            for com_b, nodes_b in enumerate(member_b):
                 a_b[com_a,com_b] = len(nodes_a.intersection(nodes_b))
                 a_notb[com_a,com_b] = len(nodes_a.difference(nodes_b))
                 nota_b[com_a,com_b] = len(nodes_b.difference(nodes_a))
