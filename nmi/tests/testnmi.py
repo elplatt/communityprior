@@ -103,7 +103,7 @@ class TestAll(unittest.TestCase):
         nptest.assert_array_almost_equal(H_k, true_H_k)
         
     def test_nmi(self):
-        N = nmi._wo_from_joint(
+        N = nmi._from_joint(
             true_a_b, true_a_notb, true_nota_b,
             true_a_marginal, true_b_marginal)
         self.assertAlmostEqual(N, true_N)
