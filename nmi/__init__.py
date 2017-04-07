@@ -240,7 +240,7 @@ def get_H_marginal(p):
     '''Argument is array of P(node in community k).'''
     # Create an array where each column is a distribution
     antip = 1.0 - p
-    pp = np.concatenate((p[:,np.newaxis],pp[:,np.newaxis]),axis=1)
+    pp = np.concatenate((p[:,np.newaxis],antip[:,np.newaxis]),axis=1)
     # Now we can pass the array to scipy to get the entropy
     return spstats.entropy(pp.transpose(), base=2)
 
