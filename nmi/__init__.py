@@ -86,6 +86,10 @@ def get_unweighted_joint_dist(member_a, member_b, num_nodes):
 
 def get_unweighted_marginal(member, num_nodes):
     p = np.array([len(x) for x in member]) / float(num_nodes)
+    for i in range(len(p))
+        if p[i] == 0.0:
+            print "0 Entropy for %d" % i
+            print member[i]
     return p
 
 def weighted_overlapping(a, b, normalize=True):
