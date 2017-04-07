@@ -3,6 +3,7 @@ import sys
 import time
 import numpy as np
 import pandas as pd
+import scipy.stats as spstats
 
 def weighted_overlapping(a, b, normalize=True):
     '''Calculate NMI for two covers with overlapping communities and weighted
@@ -155,7 +156,11 @@ def get_H_joint(a_b, a_notb, nota_b):
 
 def get_H_marginal(p):
     '''Argument is array of P(node in community k).'''
-    return -1.0 * (p*np.log2(p) + (1-p)*np.log2(1-p))
+    # Create an array where each column is a distribution
+    antip = 1.0 - p
+    pp = np.concatenate((p[:,np.newaxis],pp[:,np.newaxis]),axis=1)
+    # Now we can pass the array to scipy to get the entropy
+    return spstats.entropy(pp.transpose(), base=2)
 
 def _wo_from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
     '''LFK B.11'''
