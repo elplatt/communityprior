@@ -88,8 +88,9 @@ def get_unweighted_marginal(member, num_nodes):
     p = np.array([len(x) for x in member]) / float(num_nodes)
     for i in range(len(p)):
         if p[i] == 0.0:
-            print "0 Entropy for %d" % i
-            print member[i]
+            print "Index %d p=0" % i
+        if p[i] == 1.0:
+            print "Index %d p=1" % i
     return p
 
 def weighted_overlapping(a, b, normalize=True):
@@ -246,7 +247,8 @@ def get_H_marginal(p):
     antip = 1.0 - p
     pp = np.concatenate((p[:,np.newaxis],antip[:,np.newaxis]),axis=1)
     # Now we can pass the array to scipy to get the entropy
-    return spstats.entropy(pp.transpose(), base=2)
+    H = spstats.entropy(pp.transpose(), base=2)
+    return H
 
 def _from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal):
     '''LFK B.11'''
