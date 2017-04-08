@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as spstats
 
-def unweighted_overlapping(a, b):
+def unweighted_overlapping(a, b, threshold=1.0, normalize=False):
     '''Calculate NMI for two covers with overlapping communities and unweighted
     memberships.
     Arguments should be two covers with the following columns:
@@ -13,7 +13,7 @@ def unweighted_overlapping(a, b):
     - community_id
     - member_prob (1 or 0)
     '''
-    member_a, member_b, num_nodes = get_membership(a, b)
+    member_a, member_b, num_nodes = get_membership(a, b, threshold, normalize)
     a_b, a_notb, nota_b = get_unweighted_joint_dist(member_a, member_b, num_nodes)
     a_marginal = get_unweighted_marginal(member_a, num_nodes)
     b_marginal = get_unweighted_marginal(member_b, num_nodes)
