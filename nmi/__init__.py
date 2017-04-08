@@ -26,11 +26,19 @@ def get_membership(a, b):
     id_to_index = {}
     for node_index, node_id in enumerate(node_ids):
         id_to_index[node_id] = node_index
+    com_a_ids = sorted(list(set(a["community_id"])))
+    com_b_ids = sorted(list(set(b["community_id"])))
+    num_coms_a = len(com_a_ids)
+    num_coms_b = len(com_b_ids)
+    com_a_id_to_index = {}
+    com_b_id_to_index = {}
+    for com_index, com_id in enumerate(com_a_ids):
+        com_a_id_to_index[com_id] = com_index
+    for com_index, com_id in enumerate(com_b_ids):
+        com_b_id_to_index[com_id] = com_index
     
     # Construct node-community matrix, cells are membership weights
     print "Constructing membership matrices"
-    num_coms_a = a["community_id"].max() + 1
-    num_coms_b = b["community_id"].max() + 1
     # Represent each community as a set of member nodes
     member_a = [set() for x in range(num_coms_a)]
     member_b = [set() for x in range(num_coms_b)]
@@ -38,14 +46,16 @@ def get_membership(a, b):
         # Set weight
         node_id = row["node_id"]
         node = id_to_index[node_id]
-        com = int(row["community_id"])
+        com_id = int(row["community_id"])
+        com = com_a_id_to_index[com_id]
         w = int(row["member_prob"])
         if w == 1:
             member_a[com].add(node)
     for i, row in b.iterrows():
         # Set weight
         node = id_to_index[row["node_id"]]
-        com = int(row["community_id"])
+        com_id = int(row["community_id"])
+        com = com_b_id_to_index[com_id]
         w = int(row["member_prob"])
         if w == 1:
             member_b[com].add(node)     
@@ -114,11 +124,19 @@ def get_weights(a, b, normalize):
     id_to_index = {}
     for node_index, node_id in enumerate(node_ids):
         id_to_index[node_id] = node_index
+    com_a_ids = sorted(list(set(a["community_id"])))
+    com_b_ids = sorted(list(set(b["community_id"])))
+    num_coms_a = len(com_a_ids)
+    num_coms_b = len(com_b_ids)
+    com_a_id_to_index = {}
+    com_b_id_to_index = {}
+    for com_index, com_id in enumerate(com_a_ids):
+        com_a_id_to_index[com_id] = com_index
+    for com_index, com_id in enumerate(com_b_ids):
+        com_b_id_to_index[com_id] = com_index
     
     # Construct node-community matrix, cells are membership weights
     print "Constructing weight matrices"
-    num_coms_a = a["community_id"].max() + 1
-    num_coms_b = b["community_id"].max() + 1
     weights_a = np.zeros((num_nodes, num_coms_a))
     weights_b = np.zeros((num_nodes, num_coms_b))
     node_max_a = np.zeros(num_nodes)
@@ -127,7 +145,8 @@ def get_weights(a, b, normalize):
         # Set weight
         node_id = row["node_id"]
         node = id_to_index[node_id]
-        com = int(row["community_id"])
+        com_id = int(row["community_id"])
+        com = com_a_id_to_index[com_id]
         w = row["member_prob"]
         weights_a[node,com] = w
         # Check node's max weight for normalization
@@ -136,7 +155,8 @@ def get_weights(a, b, normalize):
     for i, row in b.iterrows():
         # Set weight
         node = id_to_index[row["node_id"]]
-        com = int(row["community_id"])
+        com_id = int(row["community_id"])
+        com = com_b_id_to_index[com_id]
         w = row["member_prob"]
         weights_b[node,com] = w
         # Check node's max weight for normalization
