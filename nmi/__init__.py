@@ -19,7 +19,7 @@ def unweighted_overlapping(a, b):
     b_marginal = get_unweighted_marginal(member_b, num_nodes)
     return _from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal)
 
-def get_membership(a, b):
+def get_membership(a, b, threshold=1.0, normalize=False):
     # Translate from ids to indexes
     node_ids = sorted(list(set(a["node_id"]).union(set(b["node_id"]))))
     num_nodes = len(node_ids)
@@ -37,6 +37,23 @@ def get_membership(a, b):
     for com_index, com_id in enumerate(com_b_ids):
         com_b_id_to_index[com_id] = com_index
     
+    # Get maximum weights for each node
+    if normalize:
+        node_max_a = np.zeros(num_nodes)
+        node_max_b = np.zeros(num_nodes)
+        for i, row in a.iterrows():
+            node_id = row["node_id"]
+            node = id_to_index[node_id]
+            w = row["member_prob"]
+            if w > node_max_a[node]:
+                node_max_a[node] = w
+        for i, row in b.iterrows():
+            node_id = row["node_id"]
+            node = id_to_index[node_id]
+            w = row["member_prob"]
+            if w > node_max_b[node]:
+                node_max_b[node] = w
+        
     # Construct node-community matrix, cells are membership weights
     print "Constructing membership matrices"
     # Represent each community as a set of member nodes
@@ -49,7 +66,9 @@ def get_membership(a, b):
         com_id = int(row["community_id"])
         com = com_a_id_to_index[com_id]
         w = int(row["member_prob"])
-        if w == 1:
+        if normalize and node_max_a[node] > 0:
+            w /= node_max_a[node]
+        if w >= threshold:
             member_a[com].add(node)
     for i, row in b.iterrows():
         # Set weight
@@ -57,7 +76,9 @@ def get_membership(a, b):
         com_id = int(row["community_id"])
         com = com_b_id_to_index[com_id]
         w = int(row["member_prob"])
-        if w == 1:
+        if normalize and node_max_b[node] > 0:
+            w /= node_max_b[node]
+        if w >= threshold:
             member_b[com].add(node)     
     return (member_a, member_b, num_nodes)
 
