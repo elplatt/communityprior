@@ -14,29 +14,19 @@ def unweighted_overlapping(a, b, threshold=1.0, normalize=False):
     - member_prob (1 or 0)
     '''
     member_a, member_b, num_nodes = get_membership(a, b, threshold, normalize)
-    a_b, a_notb, nota_b = get_unweighted_joint_dist(member_a, member_b, num_nodes)
     a_marginal = get_unweighted_marginal(member_a, num_nodes)
     b_marginal = get_unweighted_marginal(member_b, num_nodes)
+    a_b, a_notb, nota_b = get_unweighted_joint_dist(member_a, member_b, num_nodes)
     return _from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal)
 
 def get_membership(a, b, threshold=1.0, normalize=False):
-    # Translate from ids to indexes
+    # Translate nodes from ids to indexes
     node_ids = sorted(list(set(a["node_id"]).union(set(b["node_id"]))))
     num_nodes = len(node_ids)
     id_to_index = {}
     for node_index, node_id in enumerate(node_ids):
         id_to_index[node_id] = node_index
-    com_a_ids = sorted(list(set(a["community_id"])))
-    com_b_ids = sorted(list(set(b["community_id"])))
-    num_coms_a = len(com_a_ids)
-    num_coms_b = len(com_b_ids)
-    com_a_id_to_index = {}
-    com_b_id_to_index = {}
-    for com_index, com_id in enumerate(com_a_ids):
-        com_a_id_to_index[com_id] = com_index
-    for com_index, com_id in enumerate(com_b_ids):
-        com_b_id_to_index[com_id] = com_index
-    
+
     # Get maximum weights for each node
     if normalize:
         node_max_a = np.zeros(num_nodes)
@@ -53,33 +43,62 @@ def get_membership(a, b, threshold=1.0, normalize=False):
             w = row["member_prob"]
             if w > node_max_b[node]:
                 node_max_b[node] = w
-        
-    # Construct node-community matrix, cells are membership weights
-    print "Constructing membership matrices"
-    # Represent each community as a set of member nodes
-    member_a = [set() for x in range(num_coms_a)]
-    member_b = [set() for x in range(num_coms_b)]
+    
+    # Construct set of nodes indexes belonging to each community id
+    print "Constructing membership sets"
+    com_a_ids = set(a["community_id"])
+    com_b_ids = set(b["community_id"])
+    node_count_a = dict([(com_id, 0) for com_id in com_a_ids])
+    node_count_b = dict([(com_id, 0) for com_id in com_b_ids])
+    member_a_by_id = dict([(com_id, set()) for com_id in com_a_ids])
+    member_b_by_id = dict([(com_id, set()) for com_id in com_b_ids])
     for i, row in a.iterrows():
         # Set weight
         node_id = row["node_id"]
         node = id_to_index[node_id]
         com_id = int(row["community_id"])
-        com = com_a_id_to_index[com_id]
-        w = int(row["member_prob"])
+        w = float(row["member_prob"])
         if normalize and node_max_a[node] > 0:
             w /= node_max_a[node]
         if w >= threshold:
-            member_a[com].add(node)
+            member_a_by_id[com_id].add(node)
     for i, row in b.iterrows():
         # Set weight
         node = id_to_index[row["node_id"]]
         com_id = int(row["community_id"])
-        com = com_b_id_to_index[com_id]
-        w = int(row["member_prob"])
+        w = float(row["member_prob"])
         if normalize and node_max_b[node] > 0:
             w /= node_max_b[node]
         if w >= threshold:
-            member_b[com].add(node)     
+            member_b_by_id[com_id].add(node)
+
+    # Removes communities with < 2 nodes
+    print "Removing communities with < 2 nodes or all nodes"
+    for com_id in list(com_a_ids):
+        size = len(member_a_by_id[com_id])
+        if size < 2 or size == num_nodes:
+            com_a_ids.remove(com_id)
+    for com_id in list(com_b_ids):
+        size = len(member_b_by_id[com_id])
+        if size < 2 or size == num_nodes:
+            com_b_ids.remove(com_id)
+
+    # Represent each community as a set of member nodes
+    print "Converting list of sets"
+    com_a_ids = sorted(list(com_a_ids))
+    com_b_ids = sorted(list(com_b_ids))
+    com_a_id_to_index = {}
+    com_b_id_to_index = {}
+    member_a = []
+    member_b = []
+    for com_index, com_id in enumerate(com_a_ids):
+        member_a.append(member_a_by_id[com_id])
+        com_a_id_to_index[com_id] = com_index
+    for com_index, com_id in enumerate(com_b_ids):
+        member_b.append(member_b_by_id[com_id])
+        com_b_id_to_index[com_id] = com_index
+    print "%d nodes, (%d, %d) communities" % (num_nodes, len(member_a), len(member_b))
+    
     return (member_a, member_b, num_nodes)
 
 def get_unweighted_joint_dist(member_a, member_b, num_nodes):
