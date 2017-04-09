@@ -164,6 +164,7 @@ def get_weights(a, b, normalize):
     id_to_index = {}
     for node_index, node_id in enumerate(node_ids):
         id_to_index[node_id] = node_index
+
     com_a_ids = sorted(list(set(a["community_id"])))
     com_b_ids = sorted(list(set(b["community_id"])))
     num_coms_a = len(com_a_ids)
@@ -226,7 +227,23 @@ def get_weights(a, b, normalize):
         # We want to all entries for a node (rows) by the same element of b, so transpose
         weights_a = np.divide(weights_a.transpose(), node_max_a).transpose()
         weights_b = np.divide(weights_b.transpose(), node_max_b).transpose()
-        
+    
+    # Remove communities with < 2 nodes or all nodes
+    a_sum = weights_a.sum(axis=0)
+    b_sum = weights_b.sum(axis=0)
+    a_remove = []
+    b_remove = []
+    # Find indexes of communities to remove
+    for com in range(num_coms_a):
+        if a_sum[com] == 0 or a_sum[com] == num_nodes:
+            a_remove.append(com)
+    for com in range(num_coms_b):
+        if b_sum[com] == 0 or b_sum[com] == num_nodes:
+            b_remove.append(com)
+    # Remove
+    weights_a = np.delete(weights_a, a_remove, axis=1)
+    weights_b = np.delete(weights_b, b_remove, axis=1)
+    
     return (weights_a, weights_b)
     
 def get_joint_dist(weights_a, weights_b):
