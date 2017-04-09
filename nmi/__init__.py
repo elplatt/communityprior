@@ -152,9 +152,9 @@ def weighted_overlapping(a, b, normalize=True):
     - member_prob
     '''
     weights_a, weights_b = get_weights(a, b, normalize)
-    a_b, a_notb, nota_b = get_joint_dist(weights_a, weights_b)
     a_marginal = get_marginal(weights_a)
     b_marginal = get_marginal(weights_b)
+    a_b, a_notb, nota_b = get_joint_dist(weights_a, weights_b)
     return _from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal)
 
 def get_weights(a, b, normalize):
