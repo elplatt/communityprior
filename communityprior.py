@@ -101,7 +101,7 @@ def estimate_simple(com_data, id_to_index):
 
     # Scale using gensim defaults
     alpha_total = 1.0
-    beta_total = 1.0
+    beta_total = num_nodes / num_coms
     if alpha_total != 1.0:
         alpha = alpha * alpha_total
     if beta_total != 1.0:

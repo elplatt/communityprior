@@ -23,8 +23,11 @@ num_words = len(beta)
 # Double communities for nonoverlapping base methods
 if sys.argv[2] == "double":
     print "Extending alpha vector"
-    alpha2 = np.ones(num_topics) * 50.0 / float(num_topics)
+    alpha = 0.5 * alpha
+    alpha2 = np.ones(num_topics) * 0.5 / float(num_topics)
     alpha = alpha.append(pd.Series(alpha2))
+    beta = 0.5 * beta
+    # Update number of topics
     num_topics = num_topics * 2
 
 logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s.log' % base_method, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
