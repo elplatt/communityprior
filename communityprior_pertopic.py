@@ -93,6 +93,7 @@ def estimate_simple(com_data, id_to_index):
     # Normalize alpha and interpolate with univorm
     alpha = alpha / alpha.sum()
     alpha_u = np.ones(alpha.shape)
+    alpha_u = alpha_u / alpha_u.sum()
     alpha = 0.9*alpha + 0.1*beta_u
         
     # Normalize beta and interpolate with uniform
