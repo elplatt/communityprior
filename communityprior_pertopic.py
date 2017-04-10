@@ -108,7 +108,4 @@ if __name__ == '__main__':
         f.write("alpha_k\n")
         for alpha_k in alpha:
             f.write(repr(alpha_k) + "\n")
-    with open(sys.argv[4], "wb") as f:
-        f.write("beta_v\n")
-        for beta_v in beta:
-            f.write(repr(beta_v) + "\n")
+    np.savetext(sys.argv[4], beta)
