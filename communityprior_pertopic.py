@@ -91,7 +91,7 @@ def estimate_simple(com_data, id_to_index):
     
     # Scale using conventional values
     alpha = alpha * 50.0 / float(num_coms)
-    beta = 200.0 * np.divide(beta, beta.sum(axis=1))
+    beta = 200.0 * beta / beta.sum(axis=1)[:,np.newaxis]
     
     return (alpha, beta)
 
