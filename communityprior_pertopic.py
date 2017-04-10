@@ -86,12 +86,28 @@ def estimate_simple(com_data, id_to_index):
         node_index = id_to_index[int(row['node_id'])]
         com_index = com_id_to_index[int(row['community_id'])]
         mem_p = row['member_prob']
+        # Normalize per-node weight distributions before adding to alpha
         alpha[com_index] += float(mem_p) / float(node_comcount[node_index])
         beta[com_index, node_index] += mem_p
+
+    # Normalize alpha and interpolate with univorm
+    alpha = alpha / alpha.sum()
+    alpha_u = np.ones(alpha.shape)
+    alpha = 0.9*alpha + 0.1*beta_u
+        
+    # Normalize beta and interpolate with uniform
+    beta = beta / beta.sum(axis=1)[:,np.newaxis]
+    beta_u = np.ones(beta.shape)
+    beta_u = beta_u / beta_u.sum(axis=1)[:,np.newaxis]
+    beta = 0.9*beta + 0.1*beta_u
     
-    # Scale using conventional values
-    alpha = alpha * 50.0 / float(num_coms)
-    beta = 200.0 * beta / beta.sum(axis=1)[:,np.newaxis]
+    # Scale using gensim defaults
+    alpha_total = 1.0
+    beta_total = 1.0
+    if alpha_total != 1.0:
+        alpha = alpha * alpha_total
+    if beta_total != 1.0:
+        beta = beta * beta_total
     
     return (alpha, beta)
 
