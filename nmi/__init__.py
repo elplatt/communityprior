@@ -165,23 +165,38 @@ def get_weights(a, b, normalize):
     for node_index, node_id in enumerate(node_ids):
         id_to_index[node_id] = node_index
 
-    com_a_ids = sorted(list(set(a["community_id"])))
-    com_b_ids = sorted(list(set(b["community_id"])))
+    com_a_ids = set(a["community_id"])
+    com_b_ids = set(b["community_id"])
     num_coms_a = len(com_a_ids)
     num_coms_b = len(com_b_ids)
-    com_a_id_to_index = {}
-    com_b_id_to_index = {}
-    for com_index, com_id in enumerate(com_a_ids):
-        com_a_id_to_index[com_id] = com_index
-    for com_index, com_id in enumerate(com_b_ids):
-        com_b_id_to_index[com_id] = com_index
+    member_a_by_id = dict([(com_id,set()) for com_id in com_a_ids])
+    member_b_by_id = dict([(com_id,set()) for com_id in com_b_ids])
     
-    # Construct node-community matrix, cells are membership weights
+    # Get maximum weights for each node
+    if normalize:
+        node_max_a = np.zeros(num_nodes)
+        node_max_b = np.zeros(num_nodes)
+        for i, row in a.iterrows():
+            node_id = row["node_id"]
+            node = id_to_index[node_id]
+            w = row["member_prob"]
+            if w > node_max_a[node]:
+                node_max_a[node] = w
+        for i, row in b.iterrows():
+            node_id = row["node_id"]
+            node = id_to_index[node_id]
+            w = row["member_prob"]
+            if w > node_max_b[node]:
+                node_max_b[node] = w
+    
+    # Construct weight data structures
+    # member_x is list of node sets
+    # weight_x is {(com, node) -> weight}
     print "Constructing weight matrices"
-    weights_a = np.zeros((num_nodes, num_coms_a))
-    weights_b = np.zeros((num_nodes, num_coms_b))
-    node_max_a = np.zeros(num_nodes)
-    node_max_b = np.zeros(num_nodes)
+    member_a = [set() for x in range(num_coms_a)]
+    member_b = [set() for x in range(num_coms_b)]
+    weights_a = {}
+    weights_b = {}
     for i, row in a.iterrows():
         # Set weight
         node_id = row["node_id"]
@@ -189,44 +204,20 @@ def get_weights(a, b, normalize):
         com_id = int(row["community_id"])
         com = com_a_id_to_index[com_id]
         w = row["member_prob"]
-        weights_a[node,com] = w
-        # Check node's max weight for normalization
-        if w > node_max_a[node]:
-            node_max_a[node] = w
+        if normalize:
+            w /= node_max_a[node]
+        member_a[com].add(node)
+        weights_a[(node,com)] = w
     for i, row in b.iterrows():
         # Set weight
         node = id_to_index[row["node_id"]]
         com_id = int(row["community_id"])
         com = com_b_id_to_index[com_id]
         w = row["member_prob"]
-        weights_b[node,com] = w
-        # Check node's max weight for normalization
-        if w > node_max_b[node]:
-            node_max_b[node] = w
-    
-    # Normalize weight matrices
-    if normalize:
-        print "Normalizing weights"        
-        # Handle nodes that have no community
-        # Their max weight will be 0, so we can't divide by it, but we can divide by
-        # anything else and get all 0s. So we'll change to 1.
-        for node, node_max in enumerate(node_max_a):
-            if node_max == 0:
-                node_max_a[node] = 1.0
-        for node, node_max in enumerate(node_max_b):
-            if node_max == 0:
-                node_max_b[node] = 1.0
-        # Check for zeros
-        if np.count_nonzero(node_max_a) != node_max_a.size:
-            print "Zero weights present in a"
-            sys.exit()
-        if np.count_nonzero(node_max_b) != node_max_b.size:
-            print "Zero weights present in b"
-            sys.exit()
-        # np.divide(a,b) divides each row of a by the elements of b component-wise
-        # We want to all entries for a node (rows) by the same element of b, so transpose
-        weights_a = np.divide(weights_a.transpose(), node_max_a).transpose()
-        weights_b = np.divide(weights_b.transpose(), node_max_b).transpose()
+        if normalize:
+            w /= node_max_b[node]
+        member_b[com].add(node)
+        weights_b[(node,com)] = w
     
     # Remove communities with < 2 nodes or all nodes
     a_sum = weights_a.sum(axis=0)
@@ -235,14 +226,24 @@ def get_weights(a, b, normalize):
     b_remove = []
     # Find indexes of communities to remove
     for com in range(num_coms_a):
-        if a_sum[com] == 0 or a_sum[com] == num_nodes:
+        s = sum([weights_a[(node,com)] for node in member_a[com]])
+        if s == 0 or s == num_nodes:
             a_remove.append(com)
     for com in range(num_coms_b):
-        if b_sum[com] == 0 or b_sum[com] == num_nodes:
+        s = sum([weights_b[(node,com)] for node in member_b[com]])
+        if s == 0 or s == num_nodes:
             b_remove.append(com)
     # Remove
     weights_a = np.delete(weights_a, a_remove, axis=1)
     weights_b = np.delete(weights_b, b_remove, axis=1)
+
+    com_a_id_to_index = {}
+    com_b_id_to_index = {}
+    for com_index, com_id in enumerate(com_a_ids):
+        com_a_id_to_index[com_id] = com_index
+    for com_index, com_id in enumerate(com_b_ids):
+        com_b_id_to_index[com_id] = com_index
+
     
     return (weights_a, weights_b)
     
