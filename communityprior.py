@@ -93,7 +93,7 @@ def estimate_simple(com_data, id_to_index):
     alpha = alpha / alpha.sum()
     alpha_u = np.ones(alpha.shape)
     alpha_u = alpha_u / alpha_u.sum()
-    alpha = 0.9*alpha + 0.1*beta_u
+    alpha = 0.9*alpha + 0.1*alpha_u
     beta = beta / beta.sum()
     beta_u = np.ones(beta.shape)
     beta_u = beta_u.sum()
