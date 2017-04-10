@@ -89,10 +89,24 @@ def estimate_simple(com_data, id_to_index):
         alpha[com_index] += float(mem_p) / float(node_comcount[node_index])
         beta[node_index] += float(mem_p) / float(com_nodecount[com_index])
     
-    # Scale using conventional values
-    alpha = alpha * 50.0 / float(num_coms)
-    beta = beta * 200.0 / float(num_nodes)
-    
+    # Normalize alpha and beta, interpolate with uniform
+    alpha = alpha / alpha.sum()
+    alpha_u = np.ones(alpha.shape)
+    alpha_u = alpha_u / alpha_u.sum()
+    alpha = 0.9*alpha + 0.1*beta_u
+    beta = beta / beta.sum()
+    beta_u = np.ones(beta.shape)
+    beta_u = beta_u.sum()
+    beta = 0.9*beta + 0.1*beta_u
+
+    # Scale using gensim defaults
+    alpha_total = 1.0
+    beta_total = 1.0
+    if alpha_total != 1.0:
+        alpha = alpha * alpha_total
+    if beta_total != 1.0:
+        beta = beta * beta_total
+     
     return (alpha, beta)
 
 if __name__ == '__main__':
