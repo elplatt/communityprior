@@ -59,6 +59,7 @@ def estimate_simple(com_data, id_to_index):
     num_coms = len(coms)
     com_id_to_index = {}
     for i, com_id in enumerate(sorted(list(coms))):
+        com_id = int(com_id)
         com_id_to_index[com_id] = i
     
     print "Estimating %d nodes and %d communities (simple)" % (num_nodes, num_coms)
