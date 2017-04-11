@@ -93,16 +93,22 @@ def estimate_simple(com_data, id_to_index):
         beta[com_index, node_index] += mem_p
 
     # Normalize alpha and interpolate with univorm
+    print "Normalizing alpha"
     alpha = alpha / alpha.sum()
     alpha_u = np.ones(alpha.shape)
     alpha_u = alpha_u / alpha_u.sum()
     alpha = 0.9*alpha + 0.1*alpha_u
         
     # Normalize beta and interpolate with uniform
-    beta = beta / beta.sum(axis=1)[:,np.newaxis]
-    beta_u = np.ones(beta.shape)
-    beta_u = beta_u / beta_u.sum(axis=1)[:,np.newaxis]
-    beta = 0.9*beta + 0.1*beta_u
+    print "Normalizing beta"
+    beta_sum = beta.sum(axis=1)
+    beta_u = 1.0 / num_coms
+    for com in range(num_coms):
+        for node in range(num_nodes):
+            b = beta[com, node]
+            b = 0.9 * b / beta_sum[com]
+            b += 0.1 * beta_u
+            beta[com, node] = b
     
     # Scale using gensim defaults
     alpha_total = 1.0
