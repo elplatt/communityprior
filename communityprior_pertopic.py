@@ -53,7 +53,7 @@ def get_id_to_index(dict_file):
 def estimate_simple(com_data, id_to_index):
     
     # Count number of nodes and communities
-    nodes = set(com_data["node_id"])
+    nodes = set(id_to_index.keys())
     coms = set(com_data["community_id"])
     num_nodes = len(nodes)
     num_coms = len(coms)
@@ -74,7 +74,7 @@ def estimate_simple(com_data, id_to_index):
         com_id = int(row['community_id'])
         com_index = com_id_to_index[com_id]
         node_comcount[node_index] += row['member_prob']
-        com_nodecount[com_index] += row['member_prob']
+	com_nodecount[com_index] += row['member_prob']
     
     # Estimate by simple averaging
     # The above totals are used to normalize samples as we add them,
