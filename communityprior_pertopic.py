@@ -116,7 +116,7 @@ def estimate_simple(com_data, id_to_index):
 
 if __name__ == '__main__':
     # Load data
-    com_data = pd.DataFrame.from_csv(sys.argv[1], index_col=None)
+    com_data = pd.DataFrame.from_csv(sys.argv[1], header=0, index_col=None)
     id_to_index = get_id_to_index(sys.argv[2])
     
     # Estimate
