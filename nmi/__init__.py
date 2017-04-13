@@ -269,13 +269,34 @@ def get_joint_dist(member_a, weights_a, member_b, weights_b, num_nodes):
     one_norm = 1.0 / float(num_nodes)
     try:
         for com_a, nodes_a in enumerate(member_a):
-            w_a = weights_a[node,com_a] / float(num_nodes)
             for com_b, nodes_b in enumerate(member_b):
-                w_b = weights_b[node,com_b] / float(num_nodes)
-                m = min(w_a,w_b)
-                a_b[com_a,com_b] += m
-                a_notb[com_a,com_b] += w_a - m
-                nota_b[com_a,com_b] += w_b - m
+                # These set operations determine which weights we need to check
+                both = member_a.intersection(member_b)
+                a_less_b = member_a - member_b
+                b_less_a = member_b - member_a
+                # Calculate joint distribution for this pair of communities
+                tot_a_b = 0.0
+                tot_a_notb = 0.0
+                tot_nota_b = 0.0
+                # Update totals based on intersection
+                for node in both:
+                    wa = weights_a[(node,com_a)]
+                    wb = weights_b[(node,com_b)]
+                    m = min(wa, wb)
+                    tot_a_b += m
+                    tot_a_notb += wa - m
+                    tot_nota_b += wb - m
+                # Update totals based on set differences
+                for node in a_less_b:
+                    wa = weights_a[(node,com_a)]
+                    tot_a_notb += wa
+                for node in b_less_a:
+                    wb = weights_b[(node,com_b)]
+                    tot_nota_b += wb
+                # Save results in 2d array
+                a_b[com_a,com_b] = tot_a_b / float(num_nodes)
+                a_notb[com_a,com_b] = tot_a_notb / float(num_nodes)
+                nota_b[com_a,com_b] = tot_nota_b / float(num_nodes)
                 done += 1
             t = time.time()
             if t - last > 60:
