@@ -73,7 +73,7 @@ def get_membership(a, b, threshold=1.0, normalize=False):
             member_b_by_id[com_id].add(node)
 
     # Removes communities with < 1 nodes
-    print "Removing communities with < 2 nodes or all nodes"
+    print "Removing communities with < 1 nodes or all nodes"
     for com_id in list(com_a_ids):
         size = len(member_a_by_id[com_id])
         if size < 1 or size == num_nodes:
@@ -215,7 +215,7 @@ def get_weights(a, b, normalize):
         member_b_by_id[com_id].add(node)
         weights_b_by_id[(node,com_id)] = w
     
-    # Remove communities with < 2 nodes or all nodes
+    # Remove communities with < 1 nodes or all nodes
     # Find indexes of communities to remove
     remove_a = set()
     remove_b = set()
@@ -272,7 +272,7 @@ def get_joint_dist(member_a, weights_a, member_b, weights_b, num_nodes):
     # To save memory, we can find nota_notb from normalization
     
     print "Calculating joint distribution"
-    total = num_nodes * num_coms_a * num_coms_b
+    total = num_coms_a * num_coms_b
     done = 0
     start = time.time()
     last = start
