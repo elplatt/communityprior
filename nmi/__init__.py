@@ -151,10 +151,10 @@ def weighted_overlapping(a, b, normalize=True):
     - community_id
     - member_prob
     '''
-    weights_a, weights_b = get_weights(a, b, normalize)
-    a_marginal = get_marginal(weights_a)
-    b_marginal = get_marginal(weights_b)
-    a_b, a_notb, nota_b = get_joint_dist(weights_a, weights_b)
+    member_a, weights_a, member_b, weights_b, num_nodes = get_weights(a, b, normalize)
+    a_marginal = get_marginal(member_a, weights_a, num_nodes)
+    b_marginal = get_marginal(member_b, weights_b, num_nodes)
+    a_b, a_notb, nota_b = get_joint_dist(member_a, weights_a, member_b, weights_b, num_nodes)
     return _from_joint(a_b, a_notb, nota_b, a_marginal, b_marginal)
 
 def get_weights(a, b, normalize):
@@ -169,8 +169,6 @@ def get_weights(a, b, normalize):
     com_b_ids = set(b["community_id"])
     num_coms_a = len(com_a_ids)
     num_coms_b = len(com_b_ids)
-    member_a_by_id = dict([(com_id,set()) for com_id in com_a_ids])
-    member_b_by_id = dict([(com_id,set()) for com_id in com_b_ids])
     
     # Get maximum weights for each node
     if normalize:
@@ -193,63 +191,71 @@ def get_weights(a, b, normalize):
     # member_x is list of node sets
     # weight_x is {(com, node) -> weight}
     print "Constructing weight matrices"
-    member_a = [set() for x in range(num_coms_a)]
-    member_b = [set() for x in range(num_coms_b)]
-    weights_a = {}
-    weights_b = {}
+    member_a_by_id = dict([(com_id,set()) for com_id in com_a_ids])
+    member_b_by_id = dict([(com_id,set()) for com_id in com_b_ids])
+    weights_a_by_id = {}
+    weights_b_by_id = {}
     for i, row in a.iterrows():
         # Set weight
         node_id = row["node_id"]
         node = id_to_index[node_id]
         com_id = int(row["community_id"])
-        com = com_a_id_to_index[com_id]
         w = row["member_prob"]
         if normalize:
             w /= node_max_a[node]
-        member_a[com].add(node)
-        weights_a[(node,com)] = w
+        member_a_by_id[com_id].add(node)
+        weights_a_by_id[(node,com_id)] = w
     for i, row in b.iterrows():
         # Set weight
         node = id_to_index[row["node_id"]]
         com_id = int(row["community_id"])
-        com = com_b_id_to_index[com_id]
         w = row["member_prob"]
         if normalize:
             w /= node_max_b[node]
-        member_b[com].add(node)
-        weights_b[(node,com)] = w
+        member_b_by_id[com_id].add(node)
+        weights_b[(node,com_id)] = w
     
     # Remove communities with < 2 nodes or all nodes
     a_sum = weights_a.sum(axis=0)
     b_sum = weights_b.sum(axis=0)
-    a_remove = []
-    b_remove = []
     # Find indexes of communities to remove
-    for com in range(num_coms_a):
-        s = sum([weights_a[(node,com)] for node in member_a[com]])
+    for com_id in com_a_ids:
+        s = sum([weights_a_by_id[(node,com_id)] for node in member_a_by_id[com_id]])
         if s == 0 or s == num_nodes:
-            a_remove.append(com)
-    for com in range(num_coms_b):
-        s = sum([weights_b[(node,com)] for node in member_b[com]])
+            com_a_ids.remove(com_id)
+    for com_id in com_b_ids:
+        s = sum([weights_b_by_id[(node,com_id)] for node in member_b_by_id[com_id]])
         if s == 0 or s == num_nodes:
-            b_remove.append(com)
-    # Remove
-    weights_a = np.delete(weights_a, a_remove, axis=1)
-    weights_b = np.delete(weights_b, b_remove, axis=1)
-
+            com_b_ids.remove(com_id)
+    
+    # Represent each community as a set of member nodes
+    print "Converting list of sets"
+    com_a_ids = sorted(list(com_a_ids))
+    com_b_ids = sorted(list(com_b_ids))
     com_a_id_to_index = {}
     com_b_id_to_index = {}
+    member_a = []
+    member_b = []
+    weights_a = {}
+    weights_b = {}
     for com_index, com_id in enumerate(com_a_ids):
+        nodes = member_a_by_id[com_id]
+        member_a.append(nodes)
         com_a_id_to_index[com_id] = com_index
+        for node in nodes:
+            weights_a[(node,com_index)] = weights_a_by_id[(node,com_id)]
     for com_index, com_id in enumerate(com_b_ids):
+        member_b.append(member_b_by_id[com_id])
         com_b_id_to_index[com_id] = com_index
+        for node in nodes:
+            weights_b[(node,com_index)] = weights_b_by_id[(node,com_id)]
+    print "%d nodes, (%d, %d) communities" % (num_nodes, len(member_a), len(member_b))
 
+    return (member_a, weights_a, member_b, weights_b, num_nodes)
     
-    return (weights_a, weights_b)
-    
-def get_joint_dist(weights_a, weights_b):
-    num_nodes, num_coms_a = weights_a.shape
-    num_nodes, num_coms_b = weights_b.shape    
+def get_joint_dist(member_a, weights_a, member_b, weights_b, num_nodes):
+    num_coms_a = len(member_a)
+    num_coms_b = len(member_b)
     a_b = np.zeros((num_coms_a, num_coms_b))
     a_notb = np.zeros((num_coms_a, num_coms_b))
     nota_b = np.zeros((num_coms_a, num_coms_b))
@@ -262,20 +268,19 @@ def get_joint_dist(weights_a, weights_b):
     last = start
     one_norm = 1.0 / float(num_nodes)
     try:
-        for node in range(num_nodes):
-            for com_a in range(num_coms_a):
-                w_a = weights_a[node,com_a] / float(num_nodes)
-                for com_b in range(num_coms_b):
-                    w_b = weights_b[node,com_b] / float(num_nodes)
-                    m = min(w_a,w_b)
-                    a_b[com_a,com_b] += m
-                    a_notb[com_a,com_b] += w_a - m
-                    nota_b[com_a,com_b] += w_b - m
-                    done += 1
-                t = time.time()
-                if t - last > 60:
-                    print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
-                    last = t
+        for com_a, nodes_a in enumerate(member_a):
+            w_a = weights_a[node,com_a] / float(num_nodes)
+            for com_b, nodes_b in enumerate(member_b):
+                w_b = weights_b[node,com_b] / float(num_nodes)
+                m = min(w_a,w_b)
+                a_b[com_a,com_b] += m
+                a_notb[com_a,com_b] += w_a - m
+                nota_b[com_a,com_b] += w_b - m
+                done += 1
+            t = time.time()
+            if t - last > 60:
+                print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
+                last = t
     except KeyboardInterrupt:
         print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
         raise
@@ -283,9 +288,10 @@ def get_joint_dist(weights_a, weights_b):
 
     return (a_b, a_notb, nota_b)
 
-def get_marginal(weights):
-    num_nodes, num_coms = weights.shape
-    p = weights.sum(axis=0) / float(num_nodes)
+def get_marginal(member, weights, num_nodes):
+    p = [
+        sum([weights[(node,com)] for node in nodes]) / float(num_nodes)
+        for com, nodes in enumerate(member)]
     return p
 
 def get_H_joint(a_b, a_notb, nota_b):
