@@ -72,15 +72,15 @@ def get_membership(a, b, threshold=1.0, normalize=False):
         if w >= threshold:
             member_b_by_id[com_id].add(node)
 
-    # Removes communities with < 2 nodes
+    # Removes communities with < 1 nodes
     print "Removing communities with < 2 nodes or all nodes"
     for com_id in list(com_a_ids):
         size = len(member_a_by_id[com_id])
-        if size < 2 or size == num_nodes:
+        if size < 1 or size == num_nodes:
             com_a_ids.remove(com_id)
     for com_id in list(com_b_ids):
         size = len(member_b_by_id[com_id])
-        if size < 2 or size == num_nodes:
+        if size < 1 or size == num_nodes:
             com_b_ids.remove(com_id)
 
     # Represent each community as a set of member nodes
@@ -221,11 +221,15 @@ def get_weights(a, b, normalize):
     remove_b = set()
     for com_id in com_a_ids:
         s = sum([weights_a_by_id[(node,com_id)] for node in member_a_by_id[com_id]])
-        if s == 0 or s == num_nodes:
+        if s == num_nodes:
+            remove_a.add(com_id)
+        if len(member_a_by_id[com_id]) < 1:
             remove_a.add(com_id)
     for com_id in com_b_ids:
         s = sum([weights_b_by_id[(node,com_id)] for node in member_b_by_id[com_id]])
-        if s == 0 or s == num_nodes:
+        if s == num_nodes:
+            remove_b.add(com_id)
+        if len(member_b_by_id[com_id]) < 1:
             remove_b.add(com_id)
     com_a_ids = com_a_ids - remove_a
     com_b_ids = com_b_ids - remove_b

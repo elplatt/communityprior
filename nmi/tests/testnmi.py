@@ -89,16 +89,30 @@ true_N = 1.0 - (
 # Unweighted
 
 df_a_uw = pd.DataFrame.from_dict({
-    "node_id": [0, 1, 2, 0, 1, 2],
-    "community_id": [0, 0, 0, 1, 1, 2],
-    "member_prob": [1, 1, 1, 1, 1, 1]
+    "node_id": [0, 1, 0, 2],
+    "community_id": [0, 0, 1, 1],
+    "member_prob": [1, 1, 1, 1]
 })
 
 df_b_uw = pd.DataFrame.from_dict({
-    "node_id": [0, 2, 0, 1, 1, 2],
-    "community_id": [0, 0, 1, 1, 2, 2],
-    "member_prob": [1, 1, 1, 1, 1, 1]
+    "node_id": [0, 1, 1, 2],
+    "community_id": [0, 0, 1, 1],
+    "member_prob": [1, 1, 1, 1]
 })
+
+# Communities with < 2 or all nodes
+
+df_a_all = pd.DataFrame.from_dict({
+    "node_id": [0, 1, 0, 2],
+    "community_id": [0, 0, 1, 1],
+    "member_prob": [1, 1, 1, 1]
+})
+df_b_all = pd.DataFrame.from_dict({
+    "node_id": [0, 1, 0, 2, 0, 1, 2],
+    "community_id": [0, 0, 1, 1, 2, 2, 2],
+    "member_prob": [1, 1, 1, 1, 1, 1, 1]
+})
+
 
 class TestWeighted(unittest.TestCase):
     
@@ -139,6 +153,15 @@ class TestWeighted(unittest.TestCase):
         N = nmi.weighted_overlapping(df_a, df_b, normalize=False)
         self.assertAlmostEqual(N, true_N)
 
+    def test_all_node(self):
+        N = nmi.weighted_overlapping(df_a_all, df_b_all, normalize=False)
+        self.assertAlmostEqual(N, 1.0)
+
+class TestUnweighted(unittest.TestCase):    
+    def test_all_node(self):
+        N = nmi.unweighted_overlapping(df_a_all, df_b_all, normalize=False)
+        self.assertAlmostEqual(N, 1.0)
+    
 class TestReduction(unittest.TestCase):
     
     def test_reduction(self):
