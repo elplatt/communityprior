@@ -19,15 +19,26 @@ df_b = pd.DataFrame.from_dict({
     "member_prob": [0.75, 0.5, 0.25, 0.75]
 })
 
-true_weights_a = np.array([
-    [1.0, 0.75],
-    [0, 1.0]
-])
+true_num_nodes = 2
 
-true_weights_b = np.array([
-    [0.75, 0.5],
-    [0.25, 0.75]
-])
+true_member_a = [
+    set([0]), set([0,1])
+]
+true_weights_a = {
+    (0,0): 1.0,
+    (0,1): 0.75,
+    (1,1): 1.0
+}
+
+true_member_b = [
+    set([0,1]), set([0,1])
+]
+true_weights_b = {
+    (0,0): 0.75,
+    (0,1): 0.5,
+    (1,0): 0.25,
+    (1,1): 0.75
+}
 
 true_a_b = np.array([
     [0.375, 0.25],
@@ -92,19 +103,21 @@ df_b_uw = pd.DataFrame.from_dict({
 class TestWeighted(unittest.TestCase):
     
     def test_weights(self):
-        weights_a, weights_b = nmi.get_weights(df_a, df_b, normalize=False)
-        nptest.assert_array_equal(weights_a, true_weights_a)
-        nptest.assert_array_equal(weights_b, true_weights_b)
+        member_a, weights_a, member_b, weights_b, num_nodes = nmi.get_weights(df_a, df_b, normalize=False)
+        self.assertEqual(member_a, true_member_a)
+        self.assertEqual(weights_a, true_weights_a)
+        self.assertEqual(member_b, true_member_b)
+        self.assertEqual(weights_b, true_weights_b)
     
     def test_joint(self):
-        a_b, a_notb, nota_b = nmi.get_joint_dist(true_weights_a, true_weights_b)
+        a_b, a_notb, nota_b = nmi.get_joint_dist(true_member_a, true_weights_a, true_member_b, true_weights_b, true_num_nodes)
         nptest.assert_array_almost_equal(a_b, true_a_b)
         nptest.assert_array_almost_equal(a_notb, true_a_notb)
         nptest.assert_array_almost_equal(nota_b, true_nota_b)
     
     def test_marginals(self):
-        a_marginal = nmi.get_marginal(true_weights_a)
-        b_marginal = nmi.get_marginal(true_weights_b)
+        a_marginal = nmi.get_marginal(true_member_a, true_weights_a, true_num_nodes)
+        b_marginal = nmi.get_marginal(true_member_b, true_weights_b, true_num_nodes)
         nptest.assert_array_almost_equal(a_marginal, true_a_marginal)
         nptest.assert_array_almost_equal(b_marginal, true_b_marginal)
         
@@ -128,9 +141,9 @@ class TestWeighted(unittest.TestCase):
 
 class TestReduction(unittest.TestCase):
     
-    def test_recuction(self):
-        N_w = nmi.weighted_overlapping(df_a_uw, df_b_uw)
-        N_uw = nmi.unweighted_overlapping(df_a_uw, df_b_uw)
+    def test_reduction(self):
+        N_w = nmi.weighted_overlapping(df_a_uw, df_b_uw, normalize=False)
+        N_uw = nmi.unweighted_overlapping(df_a_uw, df_b_uw, normalize=False)
         self.assertAlmostEqual(N_w, N_uw)
 
 if __name__ == '__main__':

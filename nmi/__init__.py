@@ -213,20 +213,24 @@ def get_weights(a, b, normalize):
         if normalize:
             w /= node_max_b[node]
         member_b_by_id[com_id].add(node)
-        weights_b[(node,com_id)] = w
+        weights_b_by_id[(node,com_id)] = w
     
     # Remove communities with < 2 nodes or all nodes
-    a_sum = weights_a.sum(axis=0)
-    b_sum = weights_b.sum(axis=0)
     # Find indexes of communities to remove
+    remove_a = set()
+    remove_b = set()
     for com_id in com_a_ids:
         s = sum([weights_a_by_id[(node,com_id)] for node in member_a_by_id[com_id]])
         if s == 0 or s == num_nodes:
-            com_a_ids.remove(com_id)
+            remove_a.add(com_id)
     for com_id in com_b_ids:
         s = sum([weights_b_by_id[(node,com_id)] for node in member_b_by_id[com_id]])
         if s == 0 or s == num_nodes:
-            com_b_ids.remove(com_id)
+            remove_b.add(com_id)
+    com_a_ids = com_a_ids - remove_a
+    com_b_ids = com_b_ids - remove_b
+    num_coms_a = len(com_a_ids)
+    num_coms_b = len(com_b_ids)
     
     # Represent each community as a set of member nodes
     print "Converting list of sets"
@@ -245,10 +249,12 @@ def get_weights(a, b, normalize):
         for node in nodes:
             weights_a[(node,com_index)] = weights_a_by_id[(node,com_id)]
     for com_index, com_id in enumerate(com_b_ids):
-        member_b.append(member_b_by_id[com_id])
+        nodes = member_b_by_id[com_id]
+        member_b.append(nodes)
         com_b_id_to_index[com_id] = com_index
         for node in nodes:
-            weights_b[(node,com_index)] = weights_b_by_id[(node,com_id)]
+            w = weights_b_by_id[(node,com_id)]
+            weights_b[(node,com_index)] = w
     print "%d nodes, (%d, %d) communities" % (num_nodes, len(member_a), len(member_b))
 
     return (member_a, weights_a, member_b, weights_b, num_nodes)
@@ -271,9 +277,9 @@ def get_joint_dist(member_a, weights_a, member_b, weights_b, num_nodes):
         for com_a, nodes_a in enumerate(member_a):
             for com_b, nodes_b in enumerate(member_b):
                 # These set operations determine which weights we need to check
-                both = member_a.intersection(member_b)
-                a_less_b = member_a - member_b
-                b_less_a = member_b - member_a
+                both = nodes_a.intersection(nodes_b)
+                a_less_b = nodes_a - nodes_b
+                b_less_a = nodes_b - nodes_a
                 # Calculate joint distribution for this pair of communities
                 tot_a_b = 0.0
                 tot_a_notb = 0.0
@@ -313,7 +319,7 @@ def get_marginal(member, weights, num_nodes):
     p = [
         sum([weights[(node,com)] for node in nodes]) / float(num_nodes)
         for com, nodes in enumerate(member)]
-    return p
+    return np.array(p)
 
 def get_H_joint(a_b, a_notb, nota_b):
     num_coms_a, num_coms_b = a_b.shape
