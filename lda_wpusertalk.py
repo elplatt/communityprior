@@ -23,7 +23,7 @@ except IndexError:
     prior += "sym"
 num_words = 6470
 
-logging.basicConfig(filename='logs/gensim-wpusertalk-simple-%d.log' % num_topics, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+logging.basicConfig(filename='logs/gensim-wpusertalk-simple-%d-%s.log' % (num_topics, prior), format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 wpc = corpus.WPCorpus.WPCorpus()
 wpm = gensim.models.LdaModel(wpc, num_topics=num_topics, alpha=alpha, eta=beta)
 
