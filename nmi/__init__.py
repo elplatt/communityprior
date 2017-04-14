@@ -172,6 +172,8 @@ def get_weights(a, b, normalize):
     
     # Get maximum weights for each node
     if normalize:
+        print "Normalizing weights"
+        sys.stdout.flush()
         node_max_a = np.zeros(num_nodes)
         node_max_b = np.zeros(num_nodes)
         for i, row in a.iterrows():
@@ -191,6 +193,7 @@ def get_weights(a, b, normalize):
     # member_x is list of node sets
     # weight_x is {(com, node) -> weight}
     print "Constructing weight matrices"
+    sys.stdout.flush()
     member_a_by_id = dict([(com_id,set()) for com_id in com_a_ids])
     member_b_by_id = dict([(com_id,set()) for com_id in com_b_ids])
     weights_a_by_id = {}
@@ -217,6 +220,8 @@ def get_weights(a, b, normalize):
     
     # Remove communities with < 1 nodes or all nodes
     # Find indexes of communities to remove
+    print "Removing communities with no/all nodes"
+    sys.stdout.flush()
     remove_a = set()
     remove_b = set()
     for com_id in com_a_ids:
@@ -238,6 +243,7 @@ def get_weights(a, b, normalize):
     
     # Represent each community as a set of member nodes
     print "Converting list of sets"
+    sys.stdout.flush()
     com_a_ids = sorted(list(com_a_ids))
     com_b_ids = sorted(list(com_b_ids))
     com_a_id_to_index = {}
@@ -260,6 +266,7 @@ def get_weights(a, b, normalize):
             w = weights_b_by_id[(node,com_id)]
             weights_b[(node,com_index)] = w
     print "%d nodes, (%d, %d) communities" % (num_nodes, len(member_a), len(member_b))
+    sys.stdout.flush()
 
     return (member_a, weights_a, member_b, weights_b, num_nodes)
     
@@ -272,6 +279,7 @@ def get_joint_dist(member_a, weights_a, member_b, weights_b, num_nodes):
     # To save memory, we can find nota_notb from normalization
     
     print "Calculating joint distribution"
+    sys.stdout.flush()
     total = num_coms_a * num_coms_b
     done = 0
     start = time.time()
@@ -311,6 +319,7 @@ def get_joint_dist(member_a, weights_a, member_b, weights_b, num_nodes):
             t = time.time()
             if t - last > 60:
                 print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
+                sys.stdout.flush()
                 last = t
     except KeyboardInterrupt:
         print "%d/%d (%2.4f%%) in %d seconds" % (done, total, 100.0 * done / float(total), time.time() - start)
