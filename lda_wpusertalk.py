@@ -12,6 +12,8 @@ num_topics = int(sys.argv[1])
 try:
     alpha = sys.argv[2]
     prior = alpha + "-"
+    if alpha == 'sym':
+        alpha = None
 except IndexError:
     alpha = None
     prior = "sym-"
@@ -37,7 +39,7 @@ with open(dict_file, "rb") as f_dict:
         node_index, node_id = row.rstrip().split(",")
         index_to_id[int(node_index)] = int(node_id)
 
-with open(out_file % (num_topics, timestamp), "wb") as f_out:
+with open(out_file % (num_topics, prior, timestamp), "wb") as f_out:
     f_out.write("node_id,community_id,member_prob\n")
     for topic in range(num_topics):
         try:
@@ -48,5 +50,5 @@ with open(out_file % (num_topics, timestamp), "wb") as f_out:
         for i in range(len(weights)):
             node_id = index_to_id[i]
             node_weight = weights[i]
-            f_out.write("%d,%d,%s\n" % (node_id, topic, prior, repr(node_weight)))
+            f_out.write("%d,%d,%s\n" % (node_id, topic, repr(node_weight)))
     
