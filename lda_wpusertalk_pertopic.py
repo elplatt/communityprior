@@ -18,10 +18,14 @@ num_topics, num_words = beta.shape
 if sys.argv[3] == 'prior':
     alpha_df = pd.DataFrame.from_csv(alpha_file % base_method, index_col=None)
     alpha = list(alpha_df['alpha_k'])
+elif sys.argv[3] == 'sym':
+    alpha = None
 else:
     alpha = sys.argv[3]
 if sys.argv[4] == 'prior':
     pass
+elif sys.argv[4] == 'sym':
+    beta = None
 else:
     beta = sys.argv[4]
 priors = "%s-%s" % (sys.argv[3], sys.argv[4])
