@@ -12,31 +12,36 @@ alpha_file = "output/priors/wikipedia-%s-alpha-pertopic.csv"
 beta_file = "output/priors/wikipedia-%s-beta-pertopic.csv"
 base_method = sys.argv[1]
 
-# Load priors
-priors = sys.argv[3]
-alpha_df = pd.DataFrame.from_csv(alpha_file % base_method, index_col=None)
-alpha = alpha_df['alpha_k']
+# Load and configure priors
 beta = np.loadtxt(beta_file % base_method)
-#beta_df = pd.DataFrame.from_csv(beta_file % base_method, index_col=None)
-#beta = beta_df['beta_v']
-num_topics = len(alpha)
-num_words = beta.shape[1]
+num_topics, num_words = beta.shape
+if sys.argv[3] == 'prior':
+    alpha_df = pd.DataFrame.from_csv(alpha_file % base_method, index_col=None)
+    alpha = list(alpha_df['alpha_k'])
+else:
+    alpha = sys.argv[3]
+if sys.argv[4] == 'prior':
+    pass
+else:
+    beta = sys.argv[4]
+priors = "%s-%s" % (sys.argv[3], sys.argv[4])
 
 # Double communities for nonoverlapping base methods
 if sys.argv[2] == "double":
-    print "Extending alpha vector"
-    alpha = 0.5 * alpha
-    alpha2 = np.ones(num_topics) * 0.5 / float(num_topics)
-    alpha = alpha.append(pd.Series(alpha2))
-    print "Extending beta vector"
-    beta = 0.5 * beta
-    beta2 = np.ones(beta.shape) * 0.5 / float(num_topics)
-    beta = np.concatenate((beta, beta2),axis=0)
+    if not isinstance(alpha, basestring):
+        print "Extending alpha vector"
+        alpha = 0.5 * alpha
+        alpha2 = np.ones(num_topics) * 0.5 / float(num_topics)
+        alpha = alpha.append(pd.Series(alpha2))
+    if not isinstance(beta, basestring):
+        print "Extending beta vector"
+        beta = 0.5 * beta
+        beta2 = np.ones(beta.shape) * 0.5 / float(num_topics)
+        beta = np.concatenate((beta, beta2),axis=0)
     # Update num_topics
     num_topics = num_topics * 2
 
-
-logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s.log' % base_method, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s-%s.log' % (base_method, priors), format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
 c = corpus.WPCorpus.WPCorpus()
 if priors == "alphabeta":
     m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=list(alpha), eta=list(beta))
