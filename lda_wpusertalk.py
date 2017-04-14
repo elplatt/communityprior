@@ -21,7 +21,7 @@ try:
 except IndexError:
     beta = None
     prior += "sym"
-num_words = 4747
+num_words = 6470
 
 logging.basicConfig(filename='logs/gensim-wpusertalk-simple-%d.log' % num_topics, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 wpc = corpus.WPCorpus.WPCorpus()
