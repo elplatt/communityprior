@@ -53,7 +53,7 @@ def get_id_to_index(dict_file):
 def estimate_simple(com_data, id_to_index):
     
     # Count number of nodes and communities
-    nodes = set(com_data["node_id"])
+    nodes = set(id_to_index.keys())
     coms = set(com_data["community_id"])
     num_nodes = len(nodes)
     num_coms = len(coms)
