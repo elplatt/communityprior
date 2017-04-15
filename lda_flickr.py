@@ -22,7 +22,7 @@ try:
 except IndexError:
     beta = None
     prior += "sym"
-num_words = 6470
+num_words = 35275
 
 logging.basicConfig(filename='logs/gensim-flickr-simple-%d-%s.log' % (num_topics, prior), format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 c = corpus.FlickrCorpus.FlickrCorpus()
