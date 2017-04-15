@@ -4,7 +4,7 @@ import gensim
 import gensim.models
 import numpy as np
 import pandas as pd
-import corpus.FlickrCorpus
+import corpus.Flickr
 
 dict_file = "data/networks/flickr-dict.csv"
 out_file = "output/communities/flickr-hybrid-%s-%s-pertopic.csv"
@@ -12,38 +12,42 @@ alpha_file = "output/priors/flickr-%s-alpha-pertopic.csv"
 beta_file = "output/priors/flickr-%s-beta-pertopic.csv"
 base_method = sys.argv[1]
 
-# Load priors
-priors = sys.argv[3]
-alpha_df = pd.DataFrame.from_csv(alpha_file % base_method, index_col=None)
-alpha = alpha_df['alpha_k']
+# Load and configure priors
 beta = np.loadtxt(beta_file % base_method)
-#beta_df = pd.DataFrame.from_csv(beta_file % base_method, index_col=None)
-#beta = beta_df['beta_v']
-num_topics = len(alpha)
-num_words = beta.shape[1]
+num_topics, num_words = beta.shape
+if sys.argv[3] == 'prior':
+    alpha_df = pd.DataFrame.from_csv(alpha_file % base_method, index_col=None)
+    alpha = list(alpha_df['alpha_k'])
+elif sys.argv[3] == 'sym':
+    alpha = None
+else:
+    alpha = sys.argv[3]
+if sys.argv[4] == 'prior':
+    pass
+elif sys.argv[4] == 'sym':
+    beta = None
+else:
+    beta = sys.argv[4]
+priors = "%s-%s" % (sys.argv[3], sys.argv[4])
 
 # Double communities for nonoverlapping base methods
 if sys.argv[2] == "double":
-    print "Extending alpha vector"
-    alpha = 0.5 * alpha
-    alpha2 = np.ones(num_topics) * 0.5 / float(num_topics)
-    alpha = alpha.append(pd.Series(alpha2))
-    print "Extending beta vector"
-    beta = 0.5 * beta
-    beta2 = np.ones(beta.shape) * 0.5 / float(num_topics)
-    beta = np.concatenate((beta, beta2),axis=0)
+    if not isinstance(alpha, basestring):
+        print "Extending alpha vector"
+        alpha = 0.5 * alpha
+        alpha2 = np.ones(num_topics) * 0.5 / float(num_topics)
+        alpha = alpha.append(pd.Series(alpha2))
+    if not isinstance(beta, basestring):
+        print "Extending beta vector"
+        beta = 0.5 * beta
+        beta2 = np.ones(beta.shape) * 0.5 / float(num_topics)
+        beta = np.concatenate((beta, beta2),axis=0)
     # Update num_topics
     num_topics = num_topics * 2
 
-
-logging.basicConfig(filename='logs/gensim-flickr-hybrid-%s.log' % base_method, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
-c = corpus.FlickrCorpus.FlickrCorpus()
-if priors == "alphabeta":
-    m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=list(alpha), eta=list(beta))
-elif priors == "alpha":
-    m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=list(alpha))
-elif priors == "beta":
-    m = gensim.models.LdaModel(c, num_topics=num_topics, beta=list(beta))
+logging.basicConfig(filename='logs/gensim-flickr-hybrid-%s-%s.log' % (base_method, priors), format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
+c = corpus.Flickr.Flickr()
+m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=alpha, eta=beta)
 
 # Load dictionary
 print "Loading dictionary"
