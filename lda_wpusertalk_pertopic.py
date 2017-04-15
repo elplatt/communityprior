@@ -47,12 +47,7 @@ if sys.argv[2] == "double":
 
 logging.basicConfig(filename='logs/gensim-wpusertalk-hybrid-%s-%s.log' % (base_method, priors), format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
 c = corpus.WPCorpus.WPCorpus()
-if priors == "alphabeta":
-    m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=list(alpha), eta=list(beta))
-elif priors == "alpha":
-    m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=list(alpha))
-elif priors == "beta":
-    m = gensim.models.LdaModel(c, num_topics=num_topics, beta=list(beta))
+m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=alpha, eta=beta)
 
 # Load dictionary
 print "Loading dictionary"
