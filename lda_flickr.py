@@ -25,7 +25,7 @@ except IndexError:
 num_words = 6470
 
 logging.basicConfig(filename='logs/gensim-flickr-simple-%d-%s.log' % (num_topics, prior), format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-c = corpus.Flickr.Flickr()
+c = corpus.FlickrCorpus.FlickrCorpus()
 m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=alpha, eta=beta)
 
 timestamp = time.strftime("%m%dT%H%M")
