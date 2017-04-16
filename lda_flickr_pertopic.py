@@ -4,7 +4,7 @@ import gensim
 import gensim.models
 import numpy as np
 import pandas as pd
-import corpus.Flickr
+import corpus.FlickrCorpus
 
 dict_file = "data/networks/flickr-dict.csv"
 out_file = "output/communities/flickr-hybrid-%s-%s-pertopic.csv"
