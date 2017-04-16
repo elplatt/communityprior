@@ -46,7 +46,7 @@ if sys.argv[2] == "double":
     num_topics = num_topics * 2
 
 logging.basicConfig(filename='logs/gensim-flickr-hybrid-%s-%s.log' % (base_method, priors), format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
-c = corpus.Flickr.Flickr()
+c = corpus.FlickrCorpus.FlickrCorpus()
 m = gensim.models.LdaModel(c, num_topics=num_topics, alpha=alpha, eta=beta)
 
 # Load dictionary
