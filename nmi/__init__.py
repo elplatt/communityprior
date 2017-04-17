@@ -23,26 +23,25 @@ def get_membership(a, b, threshold=1.0, normalize=False):
     # Translate nodes from ids to indexes
     node_ids = sorted(list(set(a["node_id"]).union(set(b["node_id"]))))
     num_nodes = len(node_ids)
+    coms_ids = set(a["community_id"]).union(set(b["community_id"]))
     id_to_index = {}
     for node_index, node_id in enumerate(node_ids):
         id_to_index[node_id] = node_index
 
-    # Get maximum weights for each node
+    # Get maximum weights for each community
     if normalize:
-        node_max_a = np.zeros(num_nodes)
-        node_max_b = np.zeros(num_nodes)
+        com_max_a = dict([(x,0.0) for x in com_ids])
+        com_max_b = dict([(x,0.0) for x in com_ids])
         for i, row in a.iterrows():
-            node_id = row["node_id"]
-            node = id_to_index[node_id]
+            com_id = row["community_id"]
             w = row["member_prob"]
-            if w > node_max_a[node]:
-                node_max_a[node] = w
+            if w > com_max_a[com_id]:
+                com_max_a[com_id] = w
         for i, row in b.iterrows():
-            node_id = row["node_id"]
-            node = id_to_index[node_id]
+            com_id = row["community_id"]
             w = row["member_prob"]
-            if w > node_max_b[node]:
-                node_max_b[node] = w
+            if w > com_max_b[com_id]:
+                com_max_b[com_id] = w
     
     # Construct set of nodes indexes belonging to each community id
     print "Constructing membership sets"
@@ -58,8 +57,8 @@ def get_membership(a, b, threshold=1.0, normalize=False):
         node = id_to_index[node_id]
         com_id = int(row["community_id"])
         w = float(row["member_prob"])
-        if normalize and node_max_a[node] > 0:
-            w /= node_max_a[node]
+        if normalize and com_max_a[com_id] > 0:
+            w /= com_max_a[com_id]
         if w >= threshold:
             member_a_by_id[com_id].add(node)
     for i, row in b.iterrows():
@@ -67,8 +66,8 @@ def get_membership(a, b, threshold=1.0, normalize=False):
         node = id_to_index[row["node_id"]]
         com_id = int(row["community_id"])
         w = float(row["member_prob"])
-        if normalize and node_max_b[node] > 0:
-            w /= node_max_b[node]
+        if normalize and com_max_b[com_id] > 0:
+            w /= node_max_b[com_id]
         if w >= threshold:
             member_b_by_id[com_id].add(node)
 
@@ -167,6 +166,7 @@ def get_weights(a, b, normalize):
 
     com_a_ids = set(a["community_id"])
     com_b_ids = set(b["community_id"])
+    com_ids = com_a_ids.union(com_b_ids)
     num_coms_a = len(com_a_ids)
     num_coms_b = len(com_b_ids)
     
@@ -174,20 +174,18 @@ def get_weights(a, b, normalize):
     if normalize:
         print "Normalizing weights"
         sys.stdout.flush()
-        node_max_a = np.zeros(num_nodes)
-        node_max_b = np.zeros(num_nodes)
+        com_max_a = dict([(x,0.0) for x in com_ids])
+        com_max_b = dict([(x,0.0) for x in com_ids])
         for i, row in a.iterrows():
-            node_id = row["node_id"]
-            node = id_to_index[node_id]
+            com_id = row["community_id"]
             w = row["member_prob"]
-            if w > node_max_a[node]:
-                node_max_a[node] = w
+            if w > com_max_a[com_id]:
+                com_max_a[com_id] = w
         for i, row in b.iterrows():
-            node_id = row["node_id"]
-            node = id_to_index[node_id]
+            com_id = row["community_id"]
             w = row["member_prob"]
-            if w > node_max_b[node]:
-                node_max_b[node] = w
+            if w > com_max_b[com_id]:
+                com_max_b[com_id] = w
     
     # Construct weight data structures
     # member_x is list of node sets
@@ -205,7 +203,7 @@ def get_weights(a, b, normalize):
         com_id = int(row["community_id"])
         w = row["member_prob"]
         if normalize:
-            w /= node_max_a[node]
+            w /= com_max_a[com_id]
         member_a_by_id[com_id].add(node)
         weights_a_by_id[(node,com_id)] = w
     for i, row in b.iterrows():
@@ -214,7 +212,7 @@ def get_weights(a, b, normalize):
         com_id = int(row["community_id"])
         w = row["member_prob"]
         if normalize:
-            w /= node_max_b[node]
+            w /= com_max_b[com_id]
         member_b_by_id[com_id].add(node)
         weights_b_by_id[(node,com_id)] = w
     
