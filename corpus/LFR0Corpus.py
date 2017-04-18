@@ -1,4 +1,4 @@
-edge_file = "data/networks/lfr_network_mu0.dat"
+edge_file = "data/networks/lfr_network_mu0.csv"
 corpus_file = "data/networks/lfr0-corpus.csv"
 dict_file = "data/networks/lfr0-dict.csv"
 header = False
