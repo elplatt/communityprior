@@ -45,7 +45,7 @@ if sys.argv[2] == "double":
         print "Extending beta vector"
         beta = 0.5*beta
         beta2 = np.ones(beta.shape) * 0.5 / float(num_topics)
-        beta = (np.concatenate((beta, beta2),axis=0)
+        beta = np.concatenate((beta, beta2),axis=0)
         print "  new beta: %d x %d" % beta.shape
     # Update num_topics
     num_topics = num_topics * 2
