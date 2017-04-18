@@ -4,7 +4,7 @@ import gensim
 import gensim.models
 import numpy as np
 import pandas as pd
-import corpus.LFR0Corpus
+import corpus.LFR6Corpus
 
 dict_file = "data/networks/lfr6-dict.csv"
 out_file = "output/communities/lfr6-hybrid-%s-%s-pertopic.csv"
