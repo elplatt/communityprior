@@ -19,7 +19,7 @@ beta = np.loadtxt(beta_file % base_method)
 num_topics, num_words = beta.shape
 if sys.argv[3] == 'prior':
     alpha_df = pd.DataFrame.from_csv(alpha_file % base_method, index_col=None)
-    alpha = list(alpha_df['alpha_k'])
+    alpha = alpha_df['alpha_k']
 elif sys.argv[3] == 'sym':
     alpha = None
 else:
@@ -36,12 +36,12 @@ priors = "%s-%s" % (sys.argv[3], sys.argv[4])
 if sys.argv[2] == "double":
     if not isinstance(alpha, basestring):
         print "Extending alpha vector"
-        alpha = [0.5*a for a in alpha]
+        alpha = 0.5*alpha
         alpha2 = np.ones(num_topics) * 0.5 / float(num_topics)
         alpha = list(alpha.append(pd.Series(alpha2)))
     if not isinstance(beta, basestring):
         print "Extending beta vector"
-        beta = [0.5*b for b in beta]
+        beta = 0.5*beta
         beta2 = np.ones(len(beta)) * 0.5 / float(num_topics)
         beta = list(np.concatenate((beta, beta2),axis=0))
     # Update num_topics
