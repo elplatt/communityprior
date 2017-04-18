@@ -52,7 +52,7 @@ def edges_to_corpus():
             document = "\t".join(node_indexes) + "\n"
             f_corpus.write(document)
             
-class WPCorpus(object):
+class LFR0Corpus(object):
     def __iter__(self):
         for line in open(corpus_file, "rb"):
             nodes = [int(v) for v in line.rstrip().split("\t")]
