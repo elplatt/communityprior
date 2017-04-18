@@ -15,7 +15,7 @@ def truth_to_corpus():
             if row[0] == "#":
                 continue
             node_id, community_id, member_prob = row.rstrip().split(',')
-            ids.add(node_id)
+            ids.add(int(node_id))
     print "Creating mapping"
     id_order = sorted(list(ids))
     min_id = min(id_order)
