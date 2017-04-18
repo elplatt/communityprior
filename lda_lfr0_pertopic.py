@@ -42,7 +42,7 @@ if sys.argv[2] == "double":
     if not isinstance(beta, basestring):
         print "Extending beta vector"
         beta = 0.5*beta
-        beta2 = np.ones(beta.shape[1]) * 0.5 / float(num_topics)
+        beta2 = np.ones(beta.shape) * 0.5 / float(num_topics)
         beta = list(np.concatenate((beta, beta2),axis=0))
     # Update num_topics
     num_topics = num_topics * 2
