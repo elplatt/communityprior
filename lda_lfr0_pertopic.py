@@ -36,14 +36,14 @@ priors = "%s-%s" % (sys.argv[3], sys.argv[4])
 if sys.argv[2] == "double":
     if not isinstance(alpha, basestring):
         print "Extending alpha vector"
-        alpha = 0.5 * alpha
+        alpha = [0.5*a for a in alpha]
         alpha2 = np.ones(num_topics) * 0.5 / float(num_topics)
-        alpha = alpha.append(pd.Series(alpha2))
+        alpha = list(alpha.append(pd.Series(alpha2)))
     if not isinstance(beta, basestring):
         print "Extending beta vector"
-        beta = 0.5 * beta
-        beta2 = np.ones(beta.shape) * 0.5 / float(num_topics)
-        beta = np.concatenate((beta, beta2),axis=0)
+        beta = [0.5*b for b in beta]
+        beta2 = np.ones(len(beta)) * 0.5 / float(num_topics)
+        beta = list(np.concatenate((beta, beta2),axis=0))
     # Update num_topics
     num_topics = num_topics * 2
 
