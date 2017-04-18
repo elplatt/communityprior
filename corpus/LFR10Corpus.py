@@ -1,6 +1,6 @@
-edge_file = "data/networks/lfr_network_mu0.dat"
-corpus_file = "data/networks/lfr0-corpus.csv"
-dict_file = "data/networks/lfr0-dict.csv"
+edge_file = "data/networks/lfr_network_mu1.dat"
+corpus_file = "data/networks/lfr10-corpus.csv"
+dict_file = "data/networks/lfr10-dict.csv"
 header = True
 
 def edges_to_corpus():
@@ -52,7 +52,7 @@ def edges_to_corpus():
             document = "\t".join(node_indexes) + "\n"
             f_corpus.write(document)
             
-class LFR0Corpus(object):
+class LFR10Corpus(object):
     def __iter__(self):
         for line in open(corpus_file, "rb"):
             nodes = [int(v) for v in line.rstrip().split("\t")]
