@@ -1,7 +1,7 @@
 edge_file = "ddata/networks/lfr_network_mu0.4.dat"
 corpus_file = "data/networks/lfr4-corpus.csv"
 dict_file = "data/networks/lfr4-dict.csv"
-header = True
+header = False
 
 def edges_to_corpus():
     edges = {}
