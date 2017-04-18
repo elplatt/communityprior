@@ -1,12 +1,13 @@
-truth_file = "data/networks/lfr_mu_0_ground_truth_communities.csv"
+edge_file = "data/networks/lfr_mu_0_edges.dat"
 corpus_file = "data/networks/lfr0-corpus.csv"
 dict_file = "data/networks/lfr0-dict.csv"
 header = True
 
-def truth_to_corpus():
-    print "Reading truth"
+def edges_to_corpus():
+    edges = {}
     ids = set()
-    with open(truth_file, "rb") as f_edges:
+    print "Reading edges"
+    with open(edge_file, "rb") as f_edges:
         if header:
             f_edges.next()
         for i, row in enumerate(f_edges):
@@ -14,8 +15,23 @@ def truth_to_corpus():
                 print "  row: %d" % i
             if row[0] == "#":
                 continue
-            node_id, community_id, member_prob = row.rstrip().split(',')
-            ids.add(int(node_id))
+            source, target = row.rstrip().split('\t')
+            source = int(source)
+            target = int(target)
+            ids.add(source)
+            ids.add(target)
+            try:
+                source_edges = edges[source]
+            except KeyError:
+                source_edges = []
+                edges[source] = source_edges
+            source_edges.append(target)
+            try:
+                target_edges = edges[target]
+            except KeyError:
+                target_edges = []
+                edges[target] = target_edges
+            target_edges.append(source)
     print "Creating mapping"
     id_order = sorted(list(ids))
     min_id = min(id_order)
@@ -36,7 +52,7 @@ def truth_to_corpus():
             document = "\t".join(node_indexes) + "\n"
             f_corpus.write(document)
             
-class LFR0Corpus(object):
+class WPCorpus(object):
     def __iter__(self):
         for line in open(corpus_file, "rb"):
             nodes = [int(v) for v in line.rstrip().split("\t")]
