@@ -90,7 +90,12 @@ def estimate_simple(com_data, id_to_index):
     for i, row in com_data.iterrows():
         if i % 10000 == 0:
             print "  %d/%d" % (i, len(com_data))
-        node_index = id_to_index[int(row['node_id'])]
+        try:
+            node_index = id_to_index[int(row['node_id'])]
+        except KeyError:
+            if int(row['node_id']) == 0:
+                continue
+            raise
         com_index = com_id_to_index[int(row['community_id'])]
         mem_p = row['member_prob']
         # Normalize per-node weight distributions before adding to alpha
