@@ -20,7 +20,7 @@ num_topics, num_words = beta.shape
 print "%d nodes in %d communities" % (num_words, num_topics)
 if sys.argv[3] == 'prior':
     alpha_df = pd.DataFrame.from_csv(alpha_file % base_method, index_col=None)
-    alpha = alpha_df['alpha_k']
+    alpha = alpha_df['alpha_k'].values
 elif sys.argv[3] == 'sym':
     alpha = None
 else:
