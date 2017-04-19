@@ -39,7 +39,7 @@ if sys.argv[2] == "double":
         print "Extending alpha vector"
         alpha = 0.5*alpha
         alpha2 = np.ones(num_topics) * 0.5 / float(num_topics)
-        alpha = alpha.append(pd.Series(alpha2))
+        alpha = np.concatenate((alpha, alpha2))
         print "  new alpha: %d" % len(alpha)
     if not isinstance(beta, basestring):
         print "Extending beta vector"
