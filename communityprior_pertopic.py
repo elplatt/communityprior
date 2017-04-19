@@ -70,7 +70,12 @@ def estimate_simple(com_data, id_to_index):
     node_comcount = [0.0] * num_nodes
     for i, row in com_data.iterrows():
         node_id = int(row['node_id'])
-        node_index = id_to_index[node_id]
+        try:
+            node_index = id_to_index[node_id]
+        except IndexError:
+            if node_id == 0:
+                continue
+            raise
         com_id = int(row['community_id'])
         com_index = com_id_to_index[com_id]
         node_comcount[node_index] += row['member_prob']
