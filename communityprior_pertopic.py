@@ -72,7 +72,7 @@ def estimate_simple(com_data, id_to_index):
         node_id = int(row['node_id'])
         try:
             node_index = id_to_index[node_id]
-        except IndexError:
+        except KeyError:
             if node_id == 0:
                 continue
             raise
