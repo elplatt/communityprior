@@ -17,9 +17,10 @@ Corpus = corpus.LFR2Corpus.LFR2Corpus
 # Load and configure priors
 beta = np.loadtxt(beta_file % base_method)
 num_topics, num_words = beta.shape
+print "%d nodes in %d communities" % (num_words, num_topics)
 if sys.argv[3] == 'prior':
     alpha_df = pd.DataFrame.from_csv(alpha_file % base_method, index_col=None)
-    alpha = alpha_df['alpha_k']
+    alpha = alpha_df['alpha_k'].values
 elif sys.argv[3] == 'sym':
     alpha = None
 else:
@@ -38,12 +39,14 @@ if sys.argv[2] == "double":
         print "Extending alpha vector"
         alpha = 0.5*alpha
         alpha2 = np.ones(num_topics) * 0.5 / float(num_topics)
-        alpha = list(alpha.append(pd.Series(alpha2)))
+        alpha = np.concatenate((alpha, alpha2))
+        print "  new alpha: %d" % len(alpha)
     if not isinstance(beta, basestring):
         print "Extending beta vector"
         beta = 0.5*beta
         beta2 = np.ones(beta.shape) * 0.5 / float(num_topics)
-        beta = list(np.concatenate((beta, beta2),axis=0))
+        beta = np.concatenate((beta, beta2),axis=0)
+        print "  new beta: %d x %d" % beta.shape
     # Update num_topics
     num_topics = num_topics * 2
 

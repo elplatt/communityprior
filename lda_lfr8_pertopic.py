@@ -4,15 +4,15 @@ import gensim
 import gensim.models
 import numpy as np
 import pandas as pd
-import corpus.LFR6Corpus
+import corpus.LFR8Corpus
 
-dict_file = "data/networks/lfr6-dict.csv"
-out_file = "output/communities/lfr6-hybrid-%s-%s-pertopic.csv"
-alpha_file = "output/priors/lfr6-%s-alpha-pertopic.csv"
-beta_file = "output/priors/lfr6-%s-beta-pertopic.csv"
-log_file = 'logs/gensim-lfr6-hybrid-%s-%s.log'
+dict_file = "data/networks/lfr8-dict.csv"
+out_file = "output/communities/lfr8-hybrid-%s-%s-pertopic.csv"
+alpha_file = "output/priors/lfr8-%s-alpha-pertopic.csv"
+beta_file = "output/priors/lfr8-%s-beta-pertopic.csv"
+log_file = 'logs/gensim-lfr8-hybrid-%s-%s.log'
 base_method = sys.argv[1]
-Corpus = corpus.LFR6Corpus.LFR6Corpus
+Corpus = corpus.LFR8Corpus.LFR8Corpus
 
 # Load and configure priors
 beta = np.loadtxt(beta_file % base_method)
